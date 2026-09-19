@@ -1,0 +1,35 @@
+name: apply-v3-upgrade
+
+on:
+  push:
+    branches:
+      - feat/source-intelligence-v3
+    paths:
+      - ".upgrade-v3/**"
+      - ".github/workflows/apply-v3-upgrade.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-v3-upgrade
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/source-intelligence-v3
+          fetch-depth: 0
+      - name: Verify and apply V3 snapshot
+        run: python .upgrade-v3/apply.py
+      - name: Commit reconstructed source tree
+        run: |
+          git config user.name "scout-engine[bot]"
+          git config user.email "scout-engine[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "feat: add V3 career source intelligence"
+          git push origin HEAD:feat/source-intelligence-v3
