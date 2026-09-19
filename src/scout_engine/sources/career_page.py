@@ -123,6 +123,20 @@ class CareerPageAdapter(SourceAdapter):
         jobs = opportunities_from_jsonld(page.jsonld, company=self.company, page_url=url, source_key=self.source_key)
         return jobs, page
 
+    def _rendered_detail_jobs(self, url: str) -> list[Opportunity]:
+        """Render one job-detail URL and extract facts from that exact page.
+
+        This deliberately never reuses the careers-index DOM for a different
+        job URL. Browser fallback is expensive, so callers keep the candidate
+        set small and only reach this method after static extraction failed.
+        """
+        rendered = fetch_rendered_html(url)
+        structured, detail_page = self._process_page(url, rendered)
+        if structured:
+            return structured
+        heuristic = _heuristic_opportunity(self.company, self.source_key, url, detail_page)
+        return [heuristic] if heuristic else []
+
     def _candidate_links(self, page: ParsedPage, base_url: str) -> list[str]:
         same = [link for link in page.links if _same_host(link, base_url) and _looks_job_url(link)]
         return list(dict.fromkeys(same))[: self.max_pages]
@@ -254,11 +268,34 @@ class CareerPageAdapter(SourceAdapter):
                     rendered = fetch_rendered_html(result.url)
                     structured, rendered_page = self._process_page(result.url, rendered)
                     jobs.extend(structured)
+
+                    fingerprints = fingerprint_ats_links(rendered_page.links)
+                    if not jobs and fingerprints:
+                        for fp in fingerprints:
+                            try:
+                                delegated = self._delegate(fp)
+                            except Exception:
+                                continue
+                            if delegated:
+                                return delegated
+
                     if not jobs:
-                        for link in self._candidate_links(rendered_page, result.url)[: self.max_pages]:
-                            heuristic = _heuristic_opportunity(self.company, self.source_key, link, rendered_page)
-                            if heuristic:
-                                jobs.append(heuristic)
+                        # Browser rendering is the final, expensive fallback.
+                        # Render a small number of actual detail URLs, never the
+                        # index page under a job URL.
+                        browser_links = self._candidate_links(rendered_page, result.url)
+                        for link in browser_links[: min(self.max_pages, 4)]:
+                            if not policy.can_fetch(self.user_agent, link):
+                                continue
+                            try:
+                                rendered_jobs = self._rendered_detail_jobs(link)
+                            except Exception:
+                                continue
+                            for item in rendered_jobs:
+                                if item.canonical_url not in seen_urls:
+                                    jobs.append(item)
+                                    seen_urls.add(item.canonical_url)
+                            if jobs:
                                 break
                 except Exception:
                     pass
