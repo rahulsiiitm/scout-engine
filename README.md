@@ -20,6 +20,7 @@ The scout runs daily at **07:30 IST**, checks high-signal job and competition so
 - New-grad/intern roles have no experience penalty
 - Mid/senior roles are skipped unless they explicitly accept 0–2 years or new grads
 - Closed or stale postings are excluded when closure can be verified
+- **Full-time compensation gate:** only surface full-time roles when the advertised/official base compensation is verified to be **above ₹10 LPA** (or above the current INR-equivalent threshold for non-INR roles). If compensation is missing, ambiguous, or the lower end of the range is ₹10 LPA or below, do not surface it.
 
 ## Labels
 
