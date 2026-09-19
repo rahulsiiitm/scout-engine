@@ -45,11 +45,27 @@ class GitHubClient:
             body = exc.read().decode("utf-8", "replace")
             raise RuntimeError(f"GitHub API {exc.code}: {body}") from exc
 
+    def _list_paginated(self, path: str, *, per_page: int = 100) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        page = 1
+        separator = "&" if "?" in path else "?"
+        while True:
+            batch = self._request(
+                "GET",
+                f"{path}{separator}per_page={per_page}&page={page}",
+            )
+            if not isinstance(batch, list):
+                raise RuntimeError(f"GitHub list endpoint returned non-list payload for {path}")
+            items.extend(batch)
+            if len(batch) < per_page:
+                return items
+            page += 1
+
     def list_labels(self) -> list[dict[str, Any]]:
-        return self._request("GET", "/labels?per_page=100")
+        return self._list_paginated("/labels")
 
     def list_issues(self, state: str = "all") -> list[dict[str, Any]]:
-        return self._request("GET", f"/issues?state={state}&per_page=100")
+        return self._list_paginated(f"/issues?state={state}")
 
     def ensure_labels(self, labels: list[dict[str, str]]) -> None:
         existing = {item["name"] for item in self.list_labels()}
