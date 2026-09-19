@@ -1,10 +1,12 @@
-version: 2
+version: 3
 
-# Explicitly enabled structured boards. Add entries only after verifying the
-# board belongs to a tracked company.
+# Explicit structured boards. Add entries only after verifying the board belongs
+# to the tracked company. Career-page discovery can promote newly detected ATS
+# providers into this structured layer later without changing the engine.
 greenhouse: []
 lever: []
 workable: []
+smartrecruiters: []
 ashby:
   - company: AiStudio
     board: aistudio

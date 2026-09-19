@@ -1,49 +1,96 @@
-# Match Scoring
+# Scout Engine Scoring Contract
 
-Scout Engine V2 separates **eligibility**, **fit**, **confidence**, and **priority**.
+Scout separates **eligibility**, **fit**, **confidence** and **priority**. These signals are intentionally not collapsed into one magic score.
 
 ## 1. Hard eligibility gates
 
-These run before scoring. A failure produces a suppression record rather than a surfaced issue.
+Hard gates run before fit scoring.
 
-- Full-time base compensation must be verifiably **> ₹10 LPA**.
-- For ranges, the minimum must be above the threshold.
-- Mid/senior roles are blocked unless they explicitly accept new grads / 0–2 years.
-- Research-heavy roles that materially require publications are blocked when the candidate profile lacks that evidence.
-- Expired opportunities are blocked.
-- Unknown data is never guessed.
+### Full-time compensation
 
-## 2. Fit score — 0–10
+A full-time role is eligible only when:
 
-| Component | Points | Meaning |
-| --- | ---: | --- |
-| Technical overlap | 0–4 | Required stack matches strong/working skills |
-| Evidence | 0–2 | Concrete candidate projects/internships support those requirements |
-| Seniority / eligibility | 0–2 | New-grad/intern/0–2-year compatibility |
-| Logistics | 0–1 | Location/remote/timing compatibility |
-| Role direction | 0–1 | Alignment with target role families |
+- base compensation is explicitly published by an official/public source,
+- the salary is verified,
+- a salary range's minimum is used,
+- and the verified minimum is strictly **> ₹10 LPA**.
 
-Standard surface threshold: **6/10**. High fit: **8/10+**.
+Non-INR compensation is converted to INR using a dated ECB reference-rate table. The original currency, amount, FX rate, date and source are retained.
 
-## 3. Confidence — 0–1
+This gate does not apply to internships, contracts or competitions.
 
-Confidence measures source completeness, not candidate quality. Missing descriptions,
-verification timestamps, location, deadline data, or full-time compensation reduce confidence.
+### Seniority
 
-## 4. Priority — 0–10
+Roles requiring more than 2 years are blocked unless the posting explicitly allows a new graduate, fresher, student, graduating candidate or 0–2 years equivalent.
 
-Priority schedules attention using:
+### Research
 
-- fit,
-- posting freshness,
-- deadline urgency.
+Research-heavy roles are blocked when publications or a formal research record are materially expected and the candidate profile does not contain that evidence.
 
-It does not change the fit score and must not be described as a probability of getting hired.
+### Deadline / source status
 
-## Evidence matching
+Expired deadlines are blocked.
 
-Requirements are mapped to concrete candidate evidence in `config/profile.yaml`.
-For example, `RAG` can be supported by the IIT Roorkee SUTRA work while
-`computer_vision` can be supported by VidChain / AgriHive / visual-analysis work.
+A posting disappearing from one successful scan is not enough to expire it. Two consecutive successful misses are required unless the official source explicitly indicates closure.
 
-Missing evidence is surfaced explicitly instead of being silently treated as a match.
+A failed source scan never counts as a miss.
+
+## 2. Fit score: 0–10
+
+Fit measures candidate ↔ role alignment only.
+
+- technical overlap: **0–4**
+- evidence for required skills: **0–2**
+- seniority alignment: **0–2**
+- logistics / location: **0–1**
+- target-role direction: **0–1**
+
+PPO/conversion does **not** increase fit.
+
+Thresholds:
+
+- normal surface: **6/10**
+- high fit: **8/10+**
+- verified deadline <5 days may use urgent floor **4/10**
+
+## 3. Source confidence: 0–1
+
+Confidence measures trust and completeness of the extracted record.
+
+Typical extraction trust:
+
+- official structured ATS/API: ~0.98
+- official `JobPosting` JSON-LD: ~0.95
+- official static career HTML: ~0.88
+- browser-rendered official page: ~0.85
+- heuristic HTML extraction: ~0.68
+
+Final confidence blends source trust with field completeness. Full-time records are additionally penalized when verified compensation is absent, although the salary hard gate will normally reject them first.
+
+## 4. Priority score: 0–10
+
+Priority schedules human attention. It is **not** a probability of getting hired.
+
+It combines:
+
+- fit
+- freshness
+- verified deadline urgency
+- a bounded bonus for internship conversion evidence
+
+Explicit PPO/full-time-conversion evidence receives a larger priority bonus than merely likely conversion language.
+
+## 5. Provenance rule
+
+Important facts should retain their extraction source, for example:
+
+```json
+{
+  "title": "ashby",
+  "compensation": "jobposting_jsonld",
+  "deadline_utc": "greenhouse",
+  "posted_at_utc": "ashby"
+}
+```
+
+Unknown data stays unknown. Scout must not fill policy-critical fields by guesswork.

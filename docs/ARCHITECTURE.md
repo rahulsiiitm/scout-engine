@@ -1,73 +1,152 @@
-# Scout Engine V2 Architecture
+# Scout Engine V3 Architecture
 
-Scout Engine is organized around one rule: **canonical state must be deterministic and auditable**.
+## Principle
+
+GitHub Issues are the cockpit. `data/opportunities.json` is the database.
+
+Discovery systems may change. Eligibility and lifecycle semantics should not.
+
+## Data flow
 
 ```text
-Sources
-  │
-  ▼
-Normalization
-  │
-  ▼
-Hard gates ──> Suppressions log
-  │
-  ▼
-Evidence-backed fit scoring
-  │
-  ▼
-Cross-source dedupe + history
-  │
-  ▼
-Decision / lifecycle engine
-  │
-  ├──> GitHub Issues (human cockpit)
-  ├──> Daily/weekly reports
-  └──> Source and funnel analytics
+Company registry / ATS boards
+            │
+            ▼
+       source selection
+            │
+     ┌──────┼─────────┐
+     ▼      ▼         ▼
+ ATS API  JSON-LD   career crawler
+     │      │         │
+     │      │    sitemap/static/browser
+     └──────┴─────────┘
+            ▼
+       normalization
+            ▼
+        enrichment
+      ┌─────┼─────┐
+      ▼     ▼     ▼
+ eligibility   FX   PPO
+      └─────┼─────┘
+            ▼
+        hard gates
+            ▼
+      evidence match
+            ▼
+   fit / confidence / priority
+            ▼
+          dedupe
+            ▼
+      canonical history
+            ▼
+       GitHub lifecycle
 ```
 
-## Canonical state
+## Source selection
 
-`data/opportunities.json` is the source of truth for opportunity history.
+`CareerPageAdapter` is not intended to beat structured ATS APIs.
 
-GitHub Issues are a user interface over that state, not the database. An issue may be closed while an application remains in the funnel, so reports must never count only open issues.
+It inspects the public employer career surface and, when it detects a supported ATS fingerprint, delegates to the native adapter:
 
-## Scores
+- Greenhouse
+- Lever
+- Ashby
+- Workable
+- SmartRecruiters
 
-Three independent signals are maintained:
+If there is no supported structured source:
 
-- **Fit score (0–10):** evidence-backed match to the target profile.
-- **Confidence (0–1):** completeness/reliability of the source data.
-- **Priority (0–10):** action queue signal combining fit, freshness and deadline urgency.
+1. obey robots policy
+2. inspect `JobPosting` JSON-LD
+3. inspect same-site job/career links
+4. inspect sitemap URLs
+5. use static HTML heuristics
+6. use Playwright only as a last fallback
 
-Priority does not modify fit and is not a hiring-outcome prediction.
+## Crawler security boundary
 
-## Hard gates
+Before every HTTP request and redirect, the URL is validated.
 
-Hard eligibility policies run before scoring:
+Allowed schemes:
 
-1. full-time compensation,
-2. seniority/new-grad eligibility,
-3. research/publication expectations,
-4. deadline validity.
+- `https`
+- `http`
 
-A suppressed role is retained for auditability but never enters the active queue.
+Blocked:
 
-## Lifecycle
+- localhost
+- private RFC1918 addresses
+- loopback
+- link-local
+- multicast
+- reserved/unspecified addresses
+- credential-bearing URLs
+- non-HTTP schemes
 
-`discovered → qualified/reviewing → applied → OA → interview → offer → offer_accepted`
+Responses and rendered HTML are size-capped.
 
-Terminal side paths: `rejected`, `withdrawn`, `expired`, `not_pursuing`.
+The browser fallback applies the same public-network policy to subresource requests.
 
-Applying to a role does **not** close it automatically.
+## robots.txt
 
-## Email signals
+A successful robots response is parsed with Python's robots parser.
 
-`email_signals.py` only proposes a lifecycle transition from message text. It does not modify state or send mail. Any future Gmail integration should keep the same proposal-before-mutation safety boundary.
+- 2xx: obey policy
+- 4xx: treat as no robots policy
+- 5xx/network failure: fail closed for that company run
 
-## Preference learning
+Crawler delays are honored with a conservative per-page cap.
 
-Preference weights are bounded tie-breakers for priority only. They never bypass hard gates, alter fit score, or interpret a rejection as personal dislike of a role category.
+## Conditional requests
 
-## Source adapters
+Career landing pages retain:
 
-The package includes structured adapters for Greenhouse, Lever and Ashby. Boards are explicitly configured in `config/boards.yaml` to avoid guessing board identifiers.
+- ETag
+- Last-Modified
+- last successful normalized opportunity set
+
+A `304 Not Modified` restores that normalized set and refreshes verification time, preventing unchanged sources from being misclassified as missing.
+
+## Provenance
+
+`Opportunity.field_provenance` records where important values came from.
+
+`source_confidence` describes extraction trust and is distinct from candidate fit.
+
+## Foreign salary
+
+`Compensation` keeps both original compensation and INR-converted values.
+
+ECB daily reference rates are cached in `data/fx-rates.json`.
+
+A conversion failure does not guess a rate. The normal full-time compensation gate then suppresses the opportunity.
+
+## Stale postings
+
+Stale handling is source-success aware.
+
+```text
+successful scan + seen
+    -> open, miss counter = 0
+
+successful scan + missing once
+    -> possibly_closed
+
+successful scan + missing twice
+    -> closed
+       pre-application stage -> expired
+       applied/OA/interview history -> keep lifecycle, only source closes
+
+failed source scan
+    -> no stale-state mutation
+```
+
+This prevents infrastructure failures from rewriting career history.
+
+## Extension contract
+
+New ATS providers implement `SourceAdapter`.
+
+New extractors produce normalized `Opportunity` objects.
+
+Neither source adapters nor crawlers may make hiring-fit decisions. All policy decisions remain inside the engine/policies/scoring layers.

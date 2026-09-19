@@ -87,12 +87,35 @@ class GitHubClient:
         title = f"[Score {opportunity.fit_score or 0:.1f}/10] {opportunity.company} — {opportunity.title}"
         body = [
             f"**Source:** {opportunity.canonical_url}",
+            f"**Apply:** {opportunity.application_url or opportunity.canonical_url}",
+            f"**Type:** {opportunity.kind.value}",
+            f"**Location:** {opportunity.location or 'Unknown'}",
             f"**Fit:** {opportunity.fit_score or 0:.1f}/10",
             f"**Confidence:** {(opportunity.confidence_score or 0):.0%}",
             f"**Priority:** {opportunity.priority_score or 0:.1f}/10",
-            "",
-            "### Evidence",
+            f"**Extraction:** {opportunity.extraction_method or opportunity.source} ({opportunity.source_confidence:.0%} source trust)",
         ]
+        if opportunity.posted_at_utc:
+            body.append(f"**Posted:** {opportunity.posted_at_utc}")
+        if opportunity.deadline_utc:
+            body.append(f"**Deadline:** {opportunity.deadline_utc}")
+        if opportunity.compensation and opportunity.compensation.verified:
+            comp = opportunity.compensation
+            raw = f"{comp.currency} {comp.min_annual:,.0f}" if comp.min_annual is not None else comp.currency
+            if comp.max_annual is not None:
+                raw += f"–{comp.max_annual:,.0f}"
+            body.append(f"**Compensation:** {raw} ({comp.source or 'verified source'})")
+            if comp.min_lpa_inr is not None and comp.currency.upper() != "INR":
+                body.append(
+                    f"**INR floor:** ₹{comp.min_lpa_inr:.2f} LPA via ECB {comp.fx_rate_date or 'rate'}"
+                )
+        if opportunity.kind.value == "internship":
+            if opportunity.internship_duration_months is not None:
+                body.append(f"**Internship duration:** {opportunity.internship_duration_months:g} months")
+            body.append(f"**PPO / conversion:** {opportunity.conversion_signal}")
+            if opportunity.conversion_evidence:
+                body.append(f"**Conversion evidence:** {opportunity.conversion_evidence[0]}")
+        body.extend(["", "### Evidence"])
         if opportunity.evidence:
             for skill, entries in opportunity.evidence.items():
                 body.append(f"- **{skill}**: " + "; ".join(entries[:3]))
@@ -101,6 +124,12 @@ class GitHubClient:
         if opportunity.missing_requirements:
             body.extend(["", "### Missing / weak evidence"])
             body.extend(f"- {item}" for item in opportunity.missing_requirements)
+        if opportunity.field_provenance:
+            body.extend(["", "### Provenance"])
+            body.extend(
+                f"- `{field}` ← {source}"
+                for field, source in sorted(opportunity.field_provenance.items())
+            )
         body.extend(
             [
                 "",

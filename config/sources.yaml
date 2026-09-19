@@ -1,8 +1,8 @@
-version: 3
+version: 4
 
 schedule:
   timezone: Asia/Kolkata
-  time: "07:30"
+  time: "07:37"
 
 discovery_targets:
   actionable_career_opportunities_per_day: 10
@@ -20,16 +20,32 @@ discovery_targets:
 source_priority:
   - tier: 1
     name: structured_ats
-    sources: [greenhouse, lever, ashby, workable]
+    sources: [greenhouse, lever, ashby, workable, smartrecruiters]
   - tier: 2
+    name: employer_owned_careers
+    sources: [career_registry, jobposting_jsonld, sitemap, static_html, browser_fallback]
+  - tier: 3
     name: company_and_startup_direct
     sources: [company_careers, yc_hiring, wellfound, amazon_jobs]
-  - tier: 3
+  - tier: 4
     name: aggregators
     sources: [linkedin_jobs, instahyre, cutshort]
-  - tier: 4
+  - tier: 5
     name: competitions
     sources: [devpost, mlh, unstop, hackerearth, kaggle]
+
+crawl:
+  enabled: true
+  registry: config/companies.yaml
+  user_agent: "ScoutEngineBot/1.0 (+https://github.com/rahulsiiitm/scout-engine)"
+  request_timeout_seconds: 20
+  max_redirects: 5
+  max_pages_per_company: 12
+  browser_fallback: true
+  obey_robots: true
+  stale_after_successful_misses: 2
+  conditional_requests: true
+  block_private_networks: true
 
 search_lanes:
   - name: new_grad_full_time
@@ -75,6 +91,7 @@ matching:
     require_verified_compensation: true
     require_range_minimum_above_threshold: true
     reject_if_missing_or_ambiguous: true
+    convert_foreign_currency_via_ecb: true
     applies_to: full_time_only
   internship_conversion:
     prefer_explicit_ppo: true
@@ -100,6 +117,8 @@ state:
   source_stats_file: data/source-stats.json
   preference_file: data/preferences.json
   suppressions_file: data/suppressions.jsonl
+  crawl_cache_file: data/crawl-cache.json
+  fx_file: data/fx-rates.json
   all_timestamps_utc: true
   display_timezone: Asia/Kolkata
 

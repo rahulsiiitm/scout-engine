@@ -111,21 +111,17 @@ def confidence_score(opportunity: Opportunity) -> float:
         opportunity.location is not None or opportunity.remote is not None,
         opportunity.deadline_utc is not None or opportunity.kind not in {OpportunityKind.COMPETITION, OpportunityKind.HACKATHON},
     ]
-    score = sum(signals) / len(signals)
+    completeness = sum(signals) / len(signals)
+    source_trust = max(0.0, min(1.0, float(opportunity.source_confidence)))
 
     if opportunity.kind == OpportunityKind.FULL_TIME:
         comp_ok = opportunity.compensation is not None and opportunity.compensation.verified
-        score = (score * len(signals) + (1.0 if comp_ok else 0.0)) / (len(signals) + 1)
+        completeness = (completeness * len(signals) + (1.0 if comp_ok else 0.0)) / (len(signals) + 1)
 
-    return round(score, 2)
+    return round(completeness * 0.72 + source_trust * 0.28, 2)
 
 
 def priority_score(opportunity: Opportunity, now: datetime | None = None) -> float:
-    """Action priority, deliberately separate from fit.
-
-    0-10 score combining fit, freshness and deadline urgency. It is a queue
-    scheduler, not a prediction of hiring success.
-    """
     current = now or datetime.now(timezone.utc)
     fit = opportunity.fit_score or 0.0
     freshness = 0.0
@@ -140,4 +136,14 @@ def priority_score(opportunity: Opportunity, now: datetime | None = None) -> flo
         if d >= 0:
             urgency = 2.0 * math.exp(-d / 4.0)
 
-    return round(min(10.0, fit * 0.6 + freshness + urgency), 1)
+    conversion_bonus = 0.0
+    duration_bonus = 0.0
+    if opportunity.kind == OpportunityKind.INTERNSHIP:
+        if opportunity.conversion_signal == "explicit":
+            conversion_bonus = 0.8
+        elif opportunity.conversion_signal == "likely":
+            conversion_bonus = 0.25
+        if opportunity.internship_duration_months is not None and 4 <= opportunity.internship_duration_months <= 6:
+            duration_bonus = 0.15
+
+    return round(min(10.0, fit * 0.6 + freshness + urgency + conversion_bonus + duration_bonus), 1)

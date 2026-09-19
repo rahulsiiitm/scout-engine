@@ -44,7 +44,6 @@ TERMINAL_STAGES = {
     Stage.NOT_PURSUING,
 }
 
-
 ALLOWED_STAGE_TRANSITIONS: dict[Stage, set[Stage]] = {
     Stage.DISCOVERED: {Stage.QUALIFIED, Stage.NOT_PURSUING, Stage.EXPIRED},
     Stage.QUALIFIED: {Stage.REVIEWING, Stage.APPLIED, Stage.NOT_PURSUING, Stage.EXPIRED},
@@ -74,14 +73,24 @@ class Compensation:
     verified: bool = False
     source: str | None = None
     verified_at: str | None = None
+    converted_min_annual_inr: float | None = None
+    converted_max_annual_inr: float | None = None
+    fx_rate: float | None = None
+    fx_rate_date: str | None = None
+    fx_source: str | None = None
 
     @property
     def min_lpa_inr(self) -> float | None:
-        if self.currency.upper() != "INR" or self.min_annual is None:
+        amount = self.min_annual
+        if amount is None:
             return None
         if self.period == "month":
-            return self.min_annual * 12 / 100_000
-        return self.min_annual / 100_000
+            amount *= 12
+        if self.currency.upper() == "INR":
+            return amount / 100_000
+        if self.converted_min_annual_inr is not None:
+            return self.converted_min_annual_inr / 100_000
+        return None
 
 
 @dataclass(slots=True)
@@ -92,6 +101,7 @@ class Opportunity:
     kind: OpportunityKind
     source: str
     canonical_url: str
+    application_url: str | None = None
     description: str = ""
     location: str | None = None
     remote: bool | None = None
@@ -99,14 +109,27 @@ class Opportunity:
     experience_min: float | None = None
     experience_max: float | None = None
     graduation_years: list[int] = field(default_factory=list)
+    employment_type_raw: str | None = None
+    workplace_type: str | None = None
+    internship_duration_months: float | None = None
     deadline_utc: str | None = None
     posted_at_utc: str | None = None
+    updated_at_utc: str | None = None
     first_seen_utc: str = field(default_factory=utc_now_iso)
     last_seen_utc: str = field(default_factory=utc_now_iso)
     last_verified_utc: str | None = None
     compensation: Compensation | None = None
     research_heavy: bool = False
     requires_publications: bool = False
+    conversion_signal: str = "unknown"
+    conversion_evidence: list[str] = field(default_factory=list)
+    source_status: str = "unknown"
+    extraction_method: str | None = None
+    source_confidence: float = 0.80
+    field_provenance: dict[str, str] = field(default_factory=dict)
+    content_hash: str | None = None
+    last_http_status: int | None = None
+    missing_successful_scans: int = 0
     fit_score: float | None = None
     confidence_score: float | None = None
     priority_score: float | None = None
