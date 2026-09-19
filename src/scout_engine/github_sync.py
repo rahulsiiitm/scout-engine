@@ -26,17 +26,7 @@ class GitHubClient:
     def _request(self, method: str, path: str, payload: dict[str, Any] | None = None) -> Any:
         url = f"https://api.github.com/repos/{self.repository}{path}"
         data = json.dumps(payload).encode() if payload is not None else None
-        request = urllib.request.Request(
-            url,
-            data=data,
-            method=method,
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "Accept": "application/vnd.github+json",
-                "X-GitHub-Api-Version": "2022-11-28",
-                "User-Agent": "scout-engine",
-            },
-        )
+        request = urllib.request.Request(url,data=data,method=method,headers={"Authorization":f"Bearer {self.token}","Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"scout-engine"})
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
                 body = response.read()
@@ -48,20 +38,15 @@ class GitHubClient:
     def list_labels(self) -> list[dict[str, Any]]:
         return self._request("GET", "/labels?per_page=100")
 
+    def list_issues(self, state: str = "all") -> list[dict[str, Any]]:
+        return self._request("GET", f"/issues?state={state}&per_page=100")
+
     def ensure_labels(self, labels: list[dict[str, str]]) -> None:
         existing = {item["name"] for item in self.list_labels()}
         for label in labels:
             if label["name"] in existing:
                 continue
-            self._request(
-                "POST",
-                "/labels",
-                {
-                    "name": label["name"],
-                    "description": label.get("description", ""),
-                    "color": label.get("color", "ededed"),
-                },
-            )
+            self._request("POST","/labels",{"name":label["name"],"description":label.get("description",""),"color":label.get("color","ededed")})
 
     def update_issue_stage_label(self, issue_number: int, stage: Stage) -> None:
         issue = self._request("GET", f"/issues/{issue_number}")
@@ -71,35 +56,15 @@ class GitHubClient:
 
     def create_issue_for(self, opportunity: Opportunity, labels: list[str]) -> int:
         title = f"[Score {opportunity.fit_score or 0:.1f}/10] {opportunity.company} — {opportunity.title}"
-        body = [
-            f"**Source:** {opportunity.canonical_url}",
-            f"**Fit:** {opportunity.fit_score or 0:.1f}/10",
-            f"**Confidence:** {(opportunity.confidence_score or 0):.0%}",
-            f"**Priority:** {opportunity.priority_score or 0:.1f}/10",
-            "",
-            "### Evidence",
-        ]
+        body=[f"**Source:** {opportunity.canonical_url}",f"**Fit:** {opportunity.fit_score or 0:.1f}/10",f"**Confidence:** {(opportunity.confidence_score or 0):.0%}",f"**Priority:** {opportunity.priority_score or 0:.1f}/10","","### Evidence"]
         if opportunity.evidence:
             for skill, entries in opportunity.evidence.items():
                 body.append(f"- **{skill}**: " + "; ".join(entries[:3]))
         else:
             body.append("- No structured evidence extracted.")
-
         if opportunity.missing_requirements:
             body.extend(["", "### Missing / weak evidence"])
             body.extend(f"- {item}" for item in opportunity.missing_requirements)
-
-        body.extend(
-            [
-                "",
-                f"**Stable ID:** `{opportunity.id}`",
-                "",
-                "The canonical lifecycle state lives in `data/opportunities.json`.",
-            ]
-        )
-        result = self._request(
-            "POST",
-            "/issues",
-            {"title": title, "body": "\n".join(body), "labels": labels},
-        )
+        body.extend(["",f"**Stable ID:** `{opportunity.id}`","","The canonical lifecycle state lives in `data/opportunities.json`."])
+        result=self._request("POST","/issues",{"title":title,"body":"\n".join(body),"labels":labels})
         return int(result["number"])
