@@ -1,9 +1,10 @@
-version: 1
+version: 2
 
 candidate:
   graduation_year: 2027
   degree: "B.Tech CSE (AI & Data Science)"
   school: "IIIT Manipur"
+  career_stage: "final_year"
 
 roles:
   primary:
@@ -64,6 +65,32 @@ constraints:
   require_verified_full_time_compensation: true
   research_publications: false
   max_years_experience_without_explicit_new_grad_override: 2
+
+career_search:
+  daily_actionable_target: 10
+  quality_first: true
+  count_competitions_toward_target: false
+  preferred_outcomes:
+    - new_grad_full_time
+    - internship_with_ppo
+    - internship_with_full_time_conversion
+  full_time:
+    graduation_compatible: true
+    preferred_start_after: "2026-12-01"
+    allowed_experience_years: "0-2"
+  internships:
+    final_year_eligible: true
+    prefer_duration_months: "4-6"
+    prefer_explicit_ppo: true
+    prefer_full_time_conversion_language: true
+  search_expansion_when_below_target:
+    - adjacent_backend_platform_roles
+    - ml_infrastructure
+    - forward_deployed_engineering
+    - ai_reliability_and_evals
+    - computer_vision_perception
+    - remote_global_startups
+  never_fill_quota_with_weak_matches: true
 
 locations:
   preferred:
