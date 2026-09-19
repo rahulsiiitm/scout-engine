@@ -28,6 +28,13 @@ matching:
   urgent_score_floor: 4
   urgent_deadline_days: 5
   high_fit_score: 8
+  full_time_compensation:
+    currency: INR
+    minimum_lpa_exclusive: 10
+    require_verified_compensation: true
+    require_range_minimum_above_threshold: true
+    reject_if_missing_or_ambiguous: true
+    applies_to: full_time_only
   skip_mid_senior_unless:
     - "0-2 years"
     - "new grad welcome"
