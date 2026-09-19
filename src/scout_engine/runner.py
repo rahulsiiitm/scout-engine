@@ -4,6 +4,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from .config import load_profile, load_yaml
 from .engine import EngineConfig, evaluate
@@ -12,6 +13,9 @@ from .models import Decision, Opportunity, Stage
 from .sources import AshbyAdapter, GreenhouseAdapter, LeverAdapter, WorkableAdapter
 from .sources.base import SourceAdapter
 from .state import OpportunityStore
+
+
+IST = ZoneInfo("Asia/Kolkata")
 
 
 def _engine_config() -> EngineConfig:
@@ -25,9 +29,7 @@ def _engine_config() -> EngineConfig:
         urgent_deadline_days=float(matching.get("urgent_deadline_days", 5)),
         high_fit_score=float(matching.get("high_fit_score", 8)),
         confidence_floor=float(matching.get("confidence_floor", 0.55)),
-        minimum_lpa_exclusive=float(
-            constraints.get("full_time_min_lpa_exclusive", 10)
-        ),
+        minimum_lpa_exclusive=float(constraints.get("full_time_min_lpa_exclusive", 10)),
         candidate_has_publications=bool(constraints.get("research_publications", False)),
         max_years_without_override=float(
             constraints.get("max_years_experience_without_explicit_new_grad_override", 2)
@@ -54,7 +56,7 @@ def configured_adapters() -> list[SourceAdapter]:
 
 def _append_run_log(source: str, result: str) -> None:
     path = Path("run-log.md")
-    timestamp = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M")
+    timestamp = datetime.now(IST).strftime("%Y-%m-%d %H:%M")
     line = f"| {timestamp} | {source} | {result.replace('|', '/')} |\n"
     with path.open("a", encoding="utf-8") as fh:
         fh.write(line)
