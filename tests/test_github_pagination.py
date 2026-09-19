@@ -8,7 +8,7 @@ def test_github_list_issues_paginates_past_first_hundred(monkeypatch):
     page_one = [{"number": i} for i in range(1, 101)]
     page_two = [{"number": i} for i in range(101, 106)]
 
-    def fake_request(method, path, payload=None):
+    def fake_request(self, method, path, payload=None):
         calls.append(path)
         if "page=1" in path:
             return page_one
@@ -34,7 +34,7 @@ def test_github_list_labels_uses_same_pagination(monkeypatch):
     first = [{"name": f"label-{i}"} for i in range(100)]
     second = [{"name": "last"}]
 
-    def fake_request(method, path, payload=None):
+    def fake_request(self, method, path, payload=None):
         if "page=1" in path:
             return first
         if "page=2" in path:
