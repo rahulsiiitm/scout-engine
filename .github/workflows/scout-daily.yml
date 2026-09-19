@@ -27,13 +27,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: scout-engine labels
-      - name: Validate canonical state and refresh analytics
+      - name: Reconcile, scan, and refresh analytics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: scout-engine daily
       - name: Commit deterministic state updates
         run: |
           git config user.name "scout-engine[bot]"
           git config user.email "scout-engine[bot]@users.noreply.github.com"
-          git add data/ weekly/ || true
+          git add data/ weekly/ run-log.md || true
           if ! git diff --cached --quiet; then
             git commit -m "chore: refresh scout state"
             git push
