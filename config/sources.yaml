@@ -1,8 +1,21 @@
-version: 2
+version: 3
 
 schedule:
   timezone: Asia/Kolkata
   time: "07:30"
+
+discovery_targets:
+  actionable_career_opportunities_per_day: 10
+  quality_first: true
+  competitions_do_not_count: true
+  preferred_mix:
+    new_grad_full_time: 5
+    internship_with_ppo_or_conversion: 5
+  flexible_mix: true
+  if_target_not_met:
+    expand_search_before_stopping: true
+    do_not_lower_hard_gates: true
+    report_shortfall: true
 
 source_priority:
   - tier: 1
@@ -10,13 +23,40 @@ source_priority:
     sources: [greenhouse, lever, ashby, workable]
   - tier: 2
     name: company_and_startup_direct
-    sources: [company_careers, yc_hiring, wellfound]
+    sources: [company_careers, yc_hiring, wellfound, amazon_jobs]
   - tier: 3
     name: aggregators
     sources: [linkedin_jobs, instahyre, cutshort]
   - tier: 4
     name: competitions
     sources: [devpost, mlh, unstop, hackerearth, kaggle]
+
+search_lanes:
+  - name: new_grad_full_time
+    terms:
+      - "software engineer new grad"
+      - "machine learning engineer new grad"
+      - "AI engineer new grad"
+      - "backend engineer new grad"
+      - "graduate software engineer"
+      - "SDE 1"
+      - "0-2 years software engineer"
+  - name: internship_to_full_time
+    terms:
+      - "AI intern PPO"
+      - "machine learning intern PPO"
+      - "software engineer intern PPO"
+      - "backend intern PPO"
+      - "internship full-time conversion"
+      - "6 month internship 2027"
+      - "final year internship full-time"
+  - name: adjacent_high_signal
+    terms:
+      - "forward deployed engineer intern"
+      - "AI reliability intern"
+      - "ML infrastructure intern"
+      - "computer vision intern"
+      - "perception engineer new grad"
 
 limits:
   per_source_timeout_seconds: 30
@@ -36,6 +76,11 @@ matching:
     require_range_minimum_above_threshold: true
     reject_if_missing_or_ambiguous: true
     applies_to: full_time_only
+  internship_conversion:
+    prefer_explicit_ppo: true
+    prefer_full_time_conversion: true
+    prefer_final_year_eligible: true
+    conversion_signal_bonus: true
   skip_mid_senior_unless:
     - "0-2 years"
     - "new grad welcome"
