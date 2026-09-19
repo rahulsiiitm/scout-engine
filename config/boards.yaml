@@ -1,0 +1,18 @@
+version: 1
+
+# Structured job-board adapters are intentionally explicit.
+# Add a board/site only after verifying it belongs to a tracked company.
+greenhouse: []
+lever: []
+ashby: []
+
+# Example:
+# greenhouse:
+#   - company: Example
+#     board: example
+# lever:
+#   - company: Example
+#     site: example
+# ashby:
+#   - company: Example
+#     board: example
