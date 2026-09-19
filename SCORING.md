@@ -22,3 +22,9 @@ The scout scores each opportunity from **0–10**. The score is a fit signal, no
 - Missing deadline means **unknown**, never guessed
 - **Full-time salary hard gate:** advertised/official base compensation must be verifiably **> ₹10 LPA**. For salary ranges, the **minimum of the range must be above ₹10 LPA**. For non-INR compensation, convert using a current FX rate and record the source/date. If compensation is missing or cannot be verified, reject the posting from the surfaced queue.
 - This compensation gate applies to **full-time roles only**; internships/competitions are not filtered by the ₹10 LPA rule.
+
+
+## Research-heavy role gate
+
+- Research-heavy roles such as **Applied Scientist / Research Scientist / Research Engineer** should only be surfaced when the posting clearly accepts strong engineering/project experience in place of formal research, or when the candidate profile actually contains relevant research/publication evidence.
+- If a role materially expects publications, academic research, or a research track record and the candidate does not have that evidence, reject it from the surfaced queue even if the technical stack matches.
