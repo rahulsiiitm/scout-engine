@@ -1,0 +1,49 @@
+version: 1
+
+schedule:
+  timezone: Asia/Kolkata
+  time: "07:30"
+
+source_priority:
+  - tier: 1
+    name: structured_ats
+    sources: [greenhouse, lever, ashby, workable]
+  - tier: 2
+    name: company_and_startup_direct
+    sources: [company_careers, yc_hiring, wellfound]
+  - tier: 3
+    name: aggregators
+    sources: [linkedin_jobs, instahyre, cutshort]
+  - tier: 4
+    name: competitions
+    sources: [devpost, mlh, unstop, hackerearth, kaggle]
+
+limits:
+  per_source_timeout_seconds: 30
+  retry_failed_source: false
+  partial_failure_alert_threshold: 0.50
+
+matching:
+  minimum_score: 6
+  urgent_score_floor: 4
+  urgent_deadline_days: 5
+  high_fit_score: 8
+  skip_mid_senior_unless:
+    - "0-2 years"
+    - "new grad welcome"
+
+competition_filters:
+  minimum_prize_usd: 1000
+  deadline_within_days: 21
+  recognizable_sponsor_always_surface: true
+
+dedupe:
+  state_file: seen-postings.json
+  key_preference: [source_id, canonical_url]
+
+output:
+  repository: rahulsiiitm/scout-engine
+  digest_issue_title: "📡 Digest — Daily Scout Summary"
+  labels: [job, hackathon, urgent, high-fit]
+  auto_apply: false
+  auto_send_outreach: false
