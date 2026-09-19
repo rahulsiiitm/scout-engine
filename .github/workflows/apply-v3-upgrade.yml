@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   apply:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +26,8 @@ jobs:
           fetch-depth: 0
       - name: Verify and apply V3 snapshot
         run: python .upgrade-v3/apply.py
+      - name: Keep workflow files outside bootstrap commit
+        run: git checkout HEAD -- .github/workflows
       - name: Commit reconstructed source tree
         run: |
           git config user.name "scout-engine[bot]"
