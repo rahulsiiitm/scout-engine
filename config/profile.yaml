@@ -1,0 +1,78 @@
+version: 1
+
+candidate:
+  graduation_year: 2027
+  degree: "B.Tech CSE (AI & Data Science)"
+  school: "IIIT Manipur"
+
+roles:
+  primary:
+    - applied_ai
+    - ml_engineer
+    - backend_engineer
+    - sde
+    - robotics_perception
+  secondary:
+    - ai_reliability
+    - ml_infrastructure
+
+skills:
+  strong:
+    - python
+    - fastapi
+    - pytorch
+    - rag
+    - llm_orchestration
+    - docker
+    - computer_vision
+  working:
+    - cpp
+    - ros
+    - qdrant
+    - flask
+    - flutter
+    - faiss
+
+evidence:
+  python:
+    - "Magic Hour production subtitle pipeline"
+    - "IIT Roorkee SUTRA backend"
+    - "VidChain multimodal video framework"
+  fastapi:
+    - "Production and project API work"
+  pytorch:
+    - "Applied ML and computer-vision work"
+  rag:
+    - "IIT Roorkee SUTRA knowledge assistant"
+    - "AgriHive / retrieval-oriented AI projects"
+  llm_orchestration:
+    - "Magic Hour creative planning and AI evaluation"
+    - "RAG/agent workflows"
+  computer_vision:
+    - "VidChain"
+    - "AgriHive disease detection"
+    - "Magic Hour visual analysis"
+  docker:
+    - "Deployment and reproducible backend workflows"
+  cpp:
+    - "Systems/DSA and robotics-oriented work"
+  ros:
+    - "Robotics and perception project work"
+
+constraints:
+  full_time_min_lpa_exclusive: 10
+  require_verified_full_time_compensation: true
+  research_publications: false
+  max_years_experience_without_explicit_new_grad_override: 2
+
+locations:
+  preferred:
+    - India
+    - Remote
+    - Japan
+    - San Francisco
+  remote_worldwide: true
+
+availability:
+  full_time_after: "2026-12-01"
+  internships_now: true
