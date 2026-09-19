@@ -80,7 +80,10 @@ def _issue_labels(opportunity: Opportunity, cfg: EngineConfig) -> list[str]:
         labels.append("high-fit")
     if bool(opportunity.metadata.get("urgent")):
         labels.append("urgent")
-    labels.append(f"stage/{opportunity.stage.value}")
+    if opportunity.decision == Decision.SUPPRESSED:
+        labels.append("suppressed")
+    else:
+        labels.append(f"stage/{opportunity.stage.value}")
     return labels
 
 
@@ -133,6 +136,20 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
 
     store.save(list(by_id.values()))
     return counters
+
+
+def push_github_issue_labels() -> int:
+    if not os.getenv("GITHUB_TOKEN") or not os.getenv("GITHUB_REPOSITORY"):
+        return 0
+    client = GitHubClient.from_env()
+    cfg = _engine_config()
+    changed = 0
+    for item in OpportunityStore().load():
+        if item.issue_number is None:
+            continue
+        client.sync_issue_labels(item.issue_number, _issue_labels(item, cfg))
+        changed += 1
+    return changed
 
 
 def reconcile_github_stage_labels() -> int:

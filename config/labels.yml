@@ -12,9 +12,18 @@
 - name: high-fit
   description: Match score of 8/10 or higher
   color: "2da44e"
+- name: suppressed
+  description: Discovered but blocked by a hard policy gate
+  color: "57606a"
+- name: stage/discovered
+  description: Discovered and awaiting qualification
+  color: "d0d7de"
 - name: stage/qualified
   description: Qualified opportunity that has not been applied to yet
   color: "bf8700"
+- name: stage/reviewing
+  description: Actively reviewing or preparing the application
+  color: "d4a72c"
 - name: stage/applied
   description: Application submitted
   color: "0969da"
@@ -24,15 +33,21 @@
 - name: stage/interview
   description: Interview stage
   color: "fb8f44"
-- name: stage/rejected
-  description: Rejected by the company
-  color: "cf222e"
 - name: stage/offer
   description: Offer received
   color: "1a7f37"
+- name: stage/offer_accepted
+  description: Offer accepted
+  color: "116329"
+- name: stage/rejected
+  description: Rejected by the company
+  color: "cf222e"
+- name: stage/withdrawn
+  description: Application withdrawn
+  color: "6e7781"
 - name: stage/expired
   description: Opportunity expired or closed
   color: "6e7781"
-- name: suppressed
-  description: Discovered but blocked by a hard policy gate
-  color: "57606a"
+- name: stage/not_pursuing
+  description: Qualified or discovered opportunity intentionally not pursued
+  color: "8c959f"

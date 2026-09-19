@@ -1,0 +1,31 @@
+name: sync-labels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "config/labels.yml"
+      - ".github/workflows/sync-labels.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - name: Create missing taxonomy labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: scout-engine labels
+      - name: Reconcile existing opportunity issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: scout-engine push-stages
