@@ -10,9 +10,9 @@ def test_github_list_issues_paginates_past_first_hundred(monkeypatch):
 
     def fake_request(self, method, path, payload=None):
         calls.append(path)
-        if "page=1" in path:
+        if path.endswith("&page=1") or path.endswith("?page=1"):
             return page_one
-        if "page=2" in path:
+        if path.endswith("&page=2") or path.endswith("?page=2"):
             return page_two
         raise AssertionError(path)
 
@@ -35,9 +35,9 @@ def test_github_list_labels_uses_same_pagination(monkeypatch):
     second = [{"name": "last"}]
 
     def fake_request(self, method, path, payload=None):
-        if "page=1" in path:
+        if path.endswith("&page=1") or path.endswith("?page=1"):
             return first
-        if "page=2" in path:
+        if path.endswith("&page=2") or path.endswith("?page=2"):
             return second
         raise AssertionError(path)
 
