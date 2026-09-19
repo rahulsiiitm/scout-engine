@@ -19,7 +19,7 @@ class OpportunityStore:
     def save(self, opportunities: list[Opportunity]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
-            "version": 2,
+            "version": 3,
             "opportunities": [o.to_dict() for o in sorted(opportunities, key=lambda x: x.id)],
         }
         self.path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

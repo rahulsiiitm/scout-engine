@@ -1,32 +1,27 @@
 # Tracked Companies
 
-Last monthly refresh: **2026-09-19**
+Machine-readable career discovery now lives in [`config/companies.yaml`](config/companies.yaml).
 
-## Fixed AI targets
+This file remains the human strategy note.
 
-OpenAI · Anthropic · Perplexity · Mistral AI · Cohere · xAI · Sarvam AI · Krutrim
+## AI targets
+
+OpenAI · Anthropic · Perplexity · Mistral AI · Cohere · xAI · Sarvam AI
 
 ## Product / big tech
 
-Google · Microsoft · Amazon · Meta · Adobe · Atlassian · Uber
+Google · Microsoft · Amazon · Meta · Adobe · Atlassian · Uber · NVIDIA · Qualcomm · AMD
 
-## September 2026 startup watchlist
+## Startup / applied AI watch
 
-Refreshed from current YC hiring pages and live startup job boards. This is a watchlist, not a ranking.
+Retell AI · Patched · ParallelDots · Kawa Space · AiStudio
 
-- Patched (YC S24) — reliable AI / agent workflows
-- Retell AI (YC W24) — voice AI infrastructure
-- Coulomb AI (YC S21) — battery / EV intelligence
-- ParallelDots — production computer vision
-- Gravity AI — agentic AI workflows
-- AiStudio — forward-deployed production AI
-- Xipper — production ML / GenAI for hospitality
-- Kawa Space — RF/satellite ML on embedded hardware
+## Role lanes
 
-## Robotics / perception discovery
+Applied AI · ML Engineering · Backend / Platform · SDE-1 / New Grad · Forward Deployed Engineering · AI Reliability / Evals · ML Infrastructure · Computer Vision / Perception · Robotics / Autonomy
 
-No fixed company list. Search live using:
+## Registry policy
 
-`robotics`, `perception`, `ROS`, `ROS2`, `SLAM`, `computer vision`, `autonomy`, `embedded ML`, `C++`
+The source registry should stay curated rather than becoming an internet-scale crawler seed list.
 
-Refresh this file monthly. Keep the fixed target sections stable unless the candidate strategy changes.
+Prefer employer-owned public careers pages and official ATS boards. The daily broad-web scout may still discover companies outside this list and can promote strong recurring targets into `config/companies.yaml`.

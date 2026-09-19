@@ -16,11 +16,9 @@ class GateResult:
 def salary_gate(opportunity: Opportunity, minimum_lpa_exclusive: float = 10.0) -> GateResult:
     if opportunity.kind != OpportunityKind.FULL_TIME:
         return GateResult(True)
-
     comp = opportunity.compensation
     if comp is None or not comp.verified:
         return GateResult(False, "full-time compensation is missing or unverified")
-
     min_lpa = comp.min_lpa_inr
     if min_lpa is None:
         return GateResult(False, "full-time compensation cannot be verified in INR")
@@ -49,11 +47,22 @@ def seniority_gate(opportunity: Opportunity, max_years_without_override: float =
     )
     if override:
         return GateResult(True)
-
     if opportunity.experience_min is not None and opportunity.experience_min > max_years_without_override:
         return GateResult(
             False,
             f"minimum experience is {opportunity.experience_min:g} years with no new-grad override",
+        )
+    return GateResult(True)
+
+
+def graduation_gate(opportunity: Opportunity, candidate_graduation_year: int | None) -> GateResult:
+    if candidate_graduation_year is None or not opportunity.graduation_years:
+        return GateResult(True)
+    if candidate_graduation_year not in opportunity.graduation_years:
+        years = ", ".join(str(x) for x in opportunity.graduation_years)
+        return GateResult(
+            False,
+            f"posting explicitly targets graduation year(s) {years}; candidate is {candidate_graduation_year}",
         )
     return GateResult(True)
 
@@ -80,10 +89,12 @@ def apply_hard_gates(
     minimum_lpa_exclusive: float = 10.0,
     candidate_has_publications: bool = False,
     max_years_without_override: float = 2.0,
+    candidate_graduation_year: int | None = None,
 ) -> GateResult:
     gates = (
         salary_gate(opportunity, minimum_lpa_exclusive),
         seniority_gate(opportunity, max_years_without_override),
+        graduation_gate(opportunity, candidate_graduation_year),
         research_gate(opportunity, candidate_has_publications),
         deadline_gate(opportunity),
     )

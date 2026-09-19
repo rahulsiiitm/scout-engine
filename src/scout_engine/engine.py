@@ -20,11 +20,19 @@ class EngineConfig:
     confidence_floor: float = 0.55
     minimum_lpa_exclusive: float = 10.0
     candidate_has_publications: bool = False
+    candidate_graduation_year: int | None = None
     max_years_without_override: float = 2.0
     dedupe_threshold: float = 0.86
 
 
-def evaluate(opportunity: Opportunity, *, profile: dict[str, Any], existing: list[Opportunity], config: EngineConfig | None = None, now: datetime | None = None) -> Opportunity:
+def evaluate(
+    opportunity: Opportunity,
+    *,
+    profile: dict[str, Any],
+    existing: list[Opportunity],
+    config: EngineConfig | None = None,
+    now: datetime | None = None,
+) -> Opportunity:
     cfg = config or EngineConfig()
     current = now or datetime.now(timezone.utc)
 
@@ -39,6 +47,7 @@ def evaluate(opportunity: Opportunity, *, profile: dict[str, Any], existing: lis
         minimum_lpa_exclusive=cfg.minimum_lpa_exclusive,
         candidate_has_publications=cfg.candidate_has_publications,
         max_years_without_override=cfg.max_years_without_override,
+        candidate_graduation_year=cfg.candidate_graduation_year,
     )
     if not gate.passed:
         opportunity.decision = Decision.SUPPRESSED
@@ -52,7 +61,9 @@ def evaluate(opportunity: Opportunity, *, profile: dict[str, Any], existing: lis
 
     if opportunity.confidence_score < cfg.confidence_floor:
         opportunity.decision = Decision.SUPPRESSED
-        opportunity.suppression_reason = f"source confidence {opportunity.confidence_score:.2f} below {cfg.confidence_floor:.2f}"
+        opportunity.suppression_reason = (
+            f"source confidence {opportunity.confidence_score:.2f} below {cfg.confidence_floor:.2f}"
+        )
         return opportunity
 
     urgent = False
@@ -68,5 +79,8 @@ def evaluate(opportunity: Opportunity, *, profile: dict[str, Any], existing: lis
         opportunity.metadata["urgent"] = urgent
     else:
         opportunity.decision = Decision.SUPPRESSED
-        opportunity.suppression_reason = f"fit score {opportunity.fit_score:.1f} below {threshold:.1f}" + (" urgent floor" if urgent else "")
+        opportunity.suppression_reason = (
+            f"fit score {opportunity.fit_score:.1f} below {threshold:.1f}"
+            + (" urgent floor" if urgent else "")
+        )
     return opportunity

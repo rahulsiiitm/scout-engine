@@ -1,0 +1,109 @@
+version: 1
+
+# Employer-owned public career surfaces. `auto` means:
+# official ATS fingerprint -> JobPosting JSON-LD -> static HTML -> browser fallback.
+# The crawler obeys robots.txt and never authenticates, bypasses CAPTCHAs, or crawls private portals.
+companies:
+  - name: OpenAI
+    domain: openai.com
+    careers_url: https://openai.com/careers/
+    priority: 1
+    max_pages: 16
+  - name: Anthropic
+    domain: anthropic.com
+    careers_url: https://www.anthropic.com/careers/jobs
+    priority: 1
+    max_pages: 16
+  - name: Perplexity
+    domain: perplexity.ai
+    careers_url: https://www.perplexity.ai/careers
+    priority: 1
+    max_pages: 14
+  - name: Mistral AI
+    domain: mistral.ai
+    careers_url: https://mistral.ai/careers/
+    priority: 1
+    max_pages: 14
+  - name: Cohere
+    domain: cohere.com
+    careers_url: https://cohere.com/careers
+    priority: 1
+    max_pages: 14
+  - name: xAI
+    domain: x.ai
+    careers_url: https://x.ai/careers
+    priority: 1
+    max_pages: 14
+  - name: Sarvam AI
+    domain: sarvam.ai
+    careers_url: https://www.sarvam.ai/careers
+    priority: 1
+    max_pages: 18
+
+  - name: Google
+    domain: google.com
+    careers_url: https://www.google.com/about/careers/applications/jobs/results/
+    priority: 2
+    max_pages: 12
+  - name: Microsoft
+    domain: microsoft.com
+    careers_url: https://jobs.careers.microsoft.com/global/en/search
+    priority: 2
+    max_pages: 12
+  - name: Amazon
+    domain: amazon.jobs
+    careers_url: https://www.amazon.jobs/en/search
+    priority: 2
+    max_pages: 12
+  - name: Meta
+    domain: metacareers.com
+    careers_url: https://www.metacareers.com/jobs
+    priority: 2
+    max_pages: 12
+  - name: Adobe
+    domain: adobe.com
+    careers_url: https://careers.adobe.com/us/en/search-results
+    priority: 2
+    max_pages: 12
+  - name: Atlassian
+    domain: atlassian.com
+    careers_url: https://www.atlassian.com/company/careers/all-jobs
+    priority: 2
+    max_pages: 14
+  - name: Uber
+    domain: uber.com
+    careers_url: https://www.uber.com/careers/list/
+    priority: 2
+    max_pages: 12
+  - name: NVIDIA
+    domain: nvidia.com
+    careers_url: https://jobs.nvidia.com/
+    priority: 2
+    max_pages: 14
+  - name: Qualcomm
+    domain: qualcomm.com
+    careers_url: https://careers.qualcomm.com/careers
+    priority: 2
+    max_pages: 12
+  - name: AMD
+    domain: amd.com
+    careers_url: https://careers.amd.com/careers-home
+    priority: 2
+    max_pages: 12
+
+  - name: Retell AI
+    domain: retellai.com
+    priority: 2
+    max_pages: 12
+  - name: Patched
+    domain: patched.codes
+    priority: 2
+    max_pages: 10
+  - name: ParallelDots
+    domain: paralleldots.com
+    priority: 2
+    max_pages: 10
+  - name: Kawa Space
+    domain: kawaspace.com
+    priority: 2
+    max_pages: 10
