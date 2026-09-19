@@ -1,4 +1,4 @@
-version: 1
+version: 2
 
 schedule:
   timezone: Asia/Kolkata
@@ -28,6 +28,7 @@ matching:
   urgent_score_floor: 4
   urgent_deadline_days: 5
   high_fit_score: 8
+  confidence_floor: 0.55
   full_time_compensation:
     currency: INR
     minimum_lpa_exclusive: 10
@@ -45,8 +46,17 @@ competition_filters:
   recognizable_sponsor_always_surface: true
 
 dedupe:
-  state_file: seen-postings.json
+  state_file: data/opportunities.json
   key_preference: [source_id, canonical_url]
+  fuzzy_company_title_threshold: 0.86
+
+state:
+  canonical_file: data/opportunities.json
+  source_stats_file: data/source-stats.json
+  preference_file: data/preferences.json
+  suppressions_file: data/suppressions.jsonl
+  all_timestamps_utc: true
+  display_timezone: Asia/Kolkata
 
 output:
   repository: rahulsiiitm/scout-engine
@@ -54,3 +64,5 @@ output:
   labels: [job, hackathon, urgent, high-fit]
   auto_apply: false
   auto_send_outreach: false
+  close_issue_on_apply: false
+  terminal_stages: [rejected, expired, withdrawn, offer_accepted, not_pursuing]
