@@ -1,10 +1,38 @@
-# Desired issue-label taxonomy.
-# Source of truth for the scout.
+# Desired issue-label taxonomy. The engine can create missing labels when it runs
+# with a GitHub token that has Issues write permission.
 - name: job
   description: Job, internship, or contract opportunity
+  color: "1f6feb"
 - name: hackathon
   description: Hackathon or competition
+  color: "8250df"
 - name: urgent
   description: Verified deadline in fewer than 5 days
+  color: "d1242f"
 - name: high-fit
   description: Match score of 8/10 or higher
+  color: "2da44e"
+- name: stage/qualified
+  description: Qualified opportunity that has not been applied to yet
+  color: "bf8700"
+- name: stage/applied
+  description: Application submitted
+  color: "0969da"
+- name: stage/oa
+  description: Online assessment or take-home stage
+  color: "8250df"
+- name: stage/interview
+  description: Interview stage
+  color: "fb8f44"
+- name: stage/rejected
+  description: Rejected by the company
+  color: "cf222e"
+- name: stage/offer
+  description: Offer received
+  color: "1a7f37"
+- name: stage/expired
+  description: Opportunity expired or closed
+  color: "6e7781"
+- name: suppressed
+  description: Discovered but blocked by a hard policy gate
+  color: "57606a"
