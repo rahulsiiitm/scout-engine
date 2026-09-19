@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "last_updated": "2026-09-19T09:05:00+05:30",
+  "seen": [
+    "amazon:10477346",
+    "wellfound:4176912",
+    "wellfound:4377335",
+    "yc:patched:hPsUPP4",
+    "amazon:10508052",
+    "ashby:aistudio:b4a4f30b-ea11-41c7-bb46-9984165d768b",
+    "wellfound:4420282",
+    "kaggle:arc-prize-2026-arc-agi-3",
+    "kaggle:biohub-cell-tracking-during-development",
+    "kaggle:kaggriculture",
+    "devpost:yc-fall-2026-x-moss",
+    "devpost:prom-virgo-challenge"
+  ]
+}
