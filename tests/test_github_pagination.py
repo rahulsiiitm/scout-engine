@@ -16,7 +16,7 @@ def test_github_list_issues_paginates_past_first_hundred(monkeypatch):
             return page_two
         raise AssertionError(path)
 
-    monkeypatch.setattr(client, "_request", fake_request)
+    monkeypatch.setattr(GitHubClient, "_request", fake_request)
 
     issues = client.list_issues(state="all")
 
@@ -41,7 +41,7 @@ def test_github_list_labels_uses_same_pagination(monkeypatch):
             return second
         raise AssertionError(path)
 
-    monkeypatch.setattr(client, "_request", fake_request)
+    monkeypatch.setattr(GitHubClient, "_request", fake_request)
 
     labels = client.list_labels()
 
