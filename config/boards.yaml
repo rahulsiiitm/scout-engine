@@ -1,0 +1,10 @@
+version: 2
+
+# Explicitly enabled structured boards. Add entries only after verifying the
+# board belongs to a tracked company.
+greenhouse: []
+lever: []
+workable: []
+ashby:
+  - company: AiStudio
+    board: aistudio

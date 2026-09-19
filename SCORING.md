@@ -1,30 +1,49 @@
 # Match Scoring
 
-The scout scores each opportunity from **0–10**. The score is a fit signal, not a prediction of hiring outcome.
+Scout Engine V2 separates **eligibility**, **fit**, **confidence**, and **priority**.
 
-## Rubric
+## 1. Hard eligibility gates
 
-| Component | Points | What earns the points |
+These run before scoring. A failure produces a suppression record rather than a surfaced issue.
+
+- Full-time base compensation must be verifiably **> ₹10 LPA**.
+- For ranges, the minimum must be above the threshold.
+- Mid/senior roles are blocked unless they explicitly accept new grads / 0–2 years.
+- Research-heavy roles that materially require publications are blocked when the candidate profile lacks that evidence.
+- Expired opportunities are blocked.
+- Unknown data is never guessed.
+
+## 2. Fit score — 0–10
+
+| Component | Points | Meaning |
 | --- | ---: | --- |
-| Exact technical overlap | 0–4 | Python/FastAPI/PyTorch/RAG/Qdrant/ROS/C++/Docker or very close equivalents used directly in the role |
-| Transferable project/experience evidence | 0–2 | Candidate has shipped comparable production, research, backend, CV, LLM, or robotics work |
-| Seniority / eligibility fit | 0–2 | Intern, new grad, fresher, 0–2 years, or an explicit 2027 graduation window |
-| Logistics fit | 0–1 | India, remote-compatible, or timing compatible with the candidate's study timeline |
-| Role-direction fit | 0–1 | ML/AI, Applied AI, Backend, Robotics/Perception, or SDE-1 |
+| Technical overlap | 0–4 | Required stack matches strong/working skills |
+| Evidence | 0–2 | Concrete candidate projects/internships support those requirements |
+| Seniority / eligibility | 0–2 | New-grad/intern/0–2-year compatibility |
+| Logistics | 0–1 | Location/remote/timing compatibility |
+| Role direction | 0–1 | Alignment with target role families |
 
-## Gates
+Standard surface threshold: **6/10**. High fit: **8/10+**.
 
-- Standard surface threshold: **6/10**
-- Urgent exception: **4/10** when a verified deadline is under 5 days away
-- High fit: **8/10 or above**
-- Mid/senior roles are rejected unless the posting explicitly allows 0–2 years or new grads
-- A verified closed/expired posting is rejected regardless of score
-- Missing deadline means **unknown**, never guessed
-- **Full-time salary hard gate:** advertised/official base compensation must be verifiably **> ₹10 LPA**. For salary ranges, the **minimum of the range must be above ₹10 LPA**. For non-INR compensation, convert using a current FX rate and record the source/date. If compensation is missing or cannot be verified, reject the posting from the surfaced queue.
-- This compensation gate applies to **full-time roles only**; internships/competitions are not filtered by the ₹10 LPA rule.
+## 3. Confidence — 0–1
 
+Confidence measures source completeness, not candidate quality. Missing descriptions,
+verification timestamps, location, deadline data, or full-time compensation reduce confidence.
 
-## Research-heavy role gate
+## 4. Priority — 0–10
 
-- Research-heavy roles such as **Applied Scientist / Research Scientist / Research Engineer** should only be surfaced when the posting clearly accepts strong engineering/project experience in place of formal research, or when the candidate profile actually contains relevant research/publication evidence.
-- If a role materially expects publications, academic research, or a research track record and the candidate does not have that evidence, reject it from the surfaced queue even if the technical stack matches.
+Priority schedules attention using:
+
+- fit,
+- posting freshness,
+- deadline urgency.
+
+It does not change the fit score and must not be described as a probability of getting hired.
+
+## Evidence matching
+
+Requirements are mapped to concrete candidate evidence in `config/profile.yaml`.
+For example, `RAG` can be supported by the IIT Roorkee SUTRA work while
+`computer_vision` can be supported by VidChain / AgriHive / visual-analysis work.
+
+Missing evidence is surfaced explicitly instead of being silently treated as a match.

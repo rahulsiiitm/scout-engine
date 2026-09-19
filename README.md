@@ -1,63 +1,112 @@
 # scout-engine 🛰️
 
-Autonomous opportunity radar for AI/ML, backend, robotics/perception, and SDE roles.
+Personal opportunity intelligence infrastructure for AI/ML, backend, robotics/perception, SDE roles, internships and high-signal competitions.
 
-The scout runs daily at **07:30 IST**, checks high-signal job and competition sources, scores each opportunity against the target profile, deduplicates previously seen postings, and writes qualified matches to GitHub Issues.
+Scout Engine V2 is designed around an auditable pipeline:
+
+**discover → normalize → gate → evidence-match → dedupe → prioritize → track lifecycle → learn from the funnel**
+
+## What changed in V2
+
+- real Python package under `src/scout_engine/`
+- canonical opportunity history in `data/opportunities.json`
+- lifecycle state machine instead of fragile issue checkboxes alone
+- hard policy gates separated from fit scoring
+- evidence-backed JD ↔ profile matching
+- independent fit, confidence and action-priority signals
+- cross-source fuzzy deduplication
+- timezone-safe deadline normalization
+- source analytics and bounded preference learning
+- safe email-stage proposal parser
+- Greenhouse, Lever and Ashby structured adapters
+- GitHub Actions for tests, daily maintenance and weekly funnel reports
+- regression tests for salary, seniority, research, deadlines, lifecycle, dedupe and scoring
 
 ## Target profile
 
-- Final-year B.Tech, AI & Data Science, IIIT Manipur
-- Python, FastAPI, PyTorch, LLM orchestration/RAG, Docker, Qdrant, ROS, C++, Flutter
-- Applied AI experience at Magic Hour (YC W24) and IIT Roorkee Academic Affairs
-- Roles: ML/AI Engineer, Applied AI, Backend Engineer, Robotics/Perception Engineer, SDE-1
-- Open to 2027-compatible full-time roles, internships, and contract/freelance AI work
+The machine-readable profile lives in [`config/profile.yaml`](config/profile.yaml).
+It contains only career-relevant information required by the matcher.
+
+## Canonical state
+
+**`data/opportunities.json` is the source of truth.**
+
+GitHub Issues are the cockpit. They can be opened/closed for workflow convenience without
+destroying application history. Reports are generated from canonical state, not inferred
+from the set of currently open issues.
+
+## Lifecycle
+
+```text
+discovered
+   ↓
+qualified ↔ reviewing
+   ↓
+applied
+   ↓
+OA
+   ↓
+interview
+   ↓
+offer
+   ↓
+offer_accepted
+```
+
+Terminal side paths: `rejected`, `withdrawn`, `expired`, `not_pursuing`.
+
+Applying does **not** automatically close an issue.
 
 ## Matching policy
 
-- Exact stack match > adjacent technology > generic AI/ML mention
-- Surface **score >= 6/10**
-- Also surface **score >= 4/10** when a verified deadline is under 5 days away
-- New-grad/intern roles have no experience penalty
-- Mid/senior roles are skipped unless they explicitly accept 0–2 years or new grads
-- Closed or stale postings are excluded when closure can be verified
-- **Full-time compensation gate:** only surface full-time roles when the advertised/official base compensation is verified to be **above ₹10 LPA** (or above the current INR-equivalent threshold for non-INR roles). If compensation is missing, ambiguous, or the lower end of the range is ₹10 LPA or below, do not surface it.
+- standard surface threshold: **6/10**
+- high fit: **8/10+**
+- full-time compensation: verified base pay must be **> ₹10 LPA**
+- no guessing missing deadlines, compensation or eligibility
+- research-heavy roles requiring publications are blocked unless the profile has that evidence
+- mid/senior roles are blocked unless they explicitly accept new grads / 0–2 years
 
-## Labels
+See [`SCORING.md`](SCORING.md).
 
-| Label | Meaning |
-| --- | --- |
-| `job` | Job, internship, or contract |
-| `hackathon` | Hackathon or competition |
-| `urgent` | Verified deadline in fewer than 5 days |
-| `high-fit` | Match score >= 8/10 |
+## Repository map
 
-## State
+```text
+src/scout_engine/        engine, policies, scoring, lifecycle, adapters
+config/profile.yaml      candidate facts and evidence
+config/sources.yaml      policy + source configuration
+config/boards.yaml       explicitly enabled ATS boards
+data/opportunities.json  canonical opportunity history
+data/source-stats.json   source yield telemetry
+data/preferences.json    bounded ranking nudges
+daily/                   daily snapshots
+weekly/                  generated funnel reports
+docs/ARCHITECTURE.md     system design
+tests/                   regression suite
+```
 
-- `tracked-companies.md` — fixed targets and monthly startup refresh
-- `seen-postings.json` — lean dedupe state using stable IDs/URLs
-- `run-log.md` — source failures and material run warnings
-- `config/sources.yaml` — source order and scan policy
-- `config/labels.yml` — desired GitHub label taxonomy
-- `daily/` — daily scan snapshots
-- `weekly/` — application-funnel rollups
-- GitHub Issues — actionable opportunities
-- **📡 Digest — Daily Scout Summary** — running daily summary thread
+## Automation
 
-## Application state
+- `tests.yml`: unit tests + canonical-state validation
+- `scout-daily.yml`: **07:30 IST** daily maintenance
+- `scout-weekly.yml`: weekly funnel refresh
 
-Every opportunity issue starts with:
+The repo does **not** auto-apply or auto-send outreach.
 
-- [ ] Applied
-- [x] Not Applied
-- [ ] Rejected
-- [ ] Interview
+## Local commands
 
-The weekly report uses those issue states to calculate the funnel.
+```bash
+python -m pip install -e ".[dev]"
+pytest
+scout-engine validate
+scout-engine stats
+scout-engine weekly
+```
 
 ## Safety rails
 
-The scout does **not** auto-apply and does **not** auto-send outreach. For high-fit roles it may draft a three-line outreach note as an issue comment for manual review.
-
-## Schedule
-
-**07:30 IST every day.**
+- no auto-apply
+- no auto-send outreach
+- email parsing proposes stages only
+- preference learning cannot bypass hard gates
+- suppression reasons are retained for auditability
+- unknown source fields stay unknown rather than being fabricated
