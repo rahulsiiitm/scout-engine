@@ -1,0 +1,10 @@
+# Desired issue-label taxonomy.
+# Source of truth for the scout.
+- name: job
+  description: Job, internship, or contract opportunity
+- name: hackathon
+  description: Hackathon or competition
+- name: urgent
+  description: Verified deadline in fewer than 5 days
+- name: high-fit
+  description: Match score of 8/10 or higher
