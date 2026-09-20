@@ -1,6 +1,25 @@
 {
   "version": 1,
   "note": "Bounded ranking nudges only; never bypass hard gates or alter fit score.",
-  "role_weights": {},
-  "source_weights": {}
+  "role_weights": {
+    "applied_scientist": -0.25,
+    "sde": 0.0,
+    "unknown": 0.125,
+    "hackathon": 0.0,
+    "applied_ai": 0.125,
+    "ml_engineer": -0.5,
+    "competition": 0.0,
+    "ai_reliability": 0.0
+  },
+  "source_weights": {
+    "amazon": -0.25,
+    "ashby": 0.125,
+    "devpost": 0.0,
+    "greenhouse": 0.0,
+    "hiredoor": 0.0,
+    "kaggle": 0.0,
+    "linkedin": 0.0,
+    "wellfound": -0.375,
+    "yc": 0.0
+  }
 }

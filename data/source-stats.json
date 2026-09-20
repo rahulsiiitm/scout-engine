@@ -1,4 +1,95 @@
 {
   "version": 1,
-  "sources": []
+  "sources": [
+    {
+      "source": "kaggle",
+      "known": 3,
+      "surfaced": 3,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "hiredoor",
+      "known": 2,
+      "surfaced": 2,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "linkedin",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "yc",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "amazon",
+      "known": 2,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.5
+    },
+    {
+      "source": "devpost",
+      "known": 2,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 1,
+      "qualified_yield": 0.5
+    },
+    {
+      "source": "wellfound",
+      "known": 3,
+      "surfaced": 1,
+      "applied": 1,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.333
+    },
+    {
+      "source": "ashby",
+      "known": 225,
+      "surfaced": 2,
+      "applied": 1,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.009
+    },
+    {
+      "source": "greenhouse",
+      "known": 372,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.003
+    },
+    {
+      "source": "career_page",
+      "known": 35,
+      "surfaced": 0,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.0
+    }
+  ]
 }
