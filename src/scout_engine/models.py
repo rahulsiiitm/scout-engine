@@ -167,5 +167,12 @@ class Opportunity:
         data["decision"] = Decision(data.get("decision", Decision.DISCOVERED))
         data["stage"] = Stage(data.get("stage", Stage.DISCOVERED))
         if data.get("compensation"):
-            data["compensation"] = Compensation(**data["compensation"])
+            compensation = dict(data["compensation"])
+            if "min_monthly" in compensation:
+                compensation.setdefault("min_annual", compensation.pop("min_monthly"))
+                compensation.setdefault("period", "month")
+            if "max_monthly" in compensation:
+                compensation.setdefault("max_annual", compensation.pop("max_monthly"))
+                compensation.setdefault("period", "month")
+            data["compensation"] = Compensation(**compensation)
         return cls(**data)
