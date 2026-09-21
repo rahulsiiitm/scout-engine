@@ -48,6 +48,7 @@ def evaluate(
         candidate_has_publications=cfg.candidate_has_publications,
         max_years_without_override=cfg.max_years_without_override,
         candidate_graduation_year=cfg.candidate_graduation_year,
+        now=current,
     )
     if not gate.passed:
         opportunity.decision = Decision.SUPPRESSED
