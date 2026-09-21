@@ -90,13 +90,14 @@ def apply_hard_gates(
     candidate_has_publications: bool = False,
     max_years_without_override: float = 2.0,
     candidate_graduation_year: int | None = None,
+    now: datetime | None = None,
 ) -> GateResult:
     gates = (
         salary_gate(opportunity, minimum_lpa_exclusive),
         seniority_gate(opportunity, max_years_without_override),
         graduation_gate(opportunity, candidate_graduation_year),
         research_gate(opportunity, candidate_has_publications),
-        deadline_gate(opportunity),
+        deadline_gate(opportunity, now=now),
     )
     for result in gates:
         if not result.passed:
