@@ -163,6 +163,42 @@ class Opportunity:
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> "Opportunity":
         data = dict(raw)
+
+        # V2 recovery snapshots used compact field names. Normalize them at the
+        # state boundary so canonical reads remain backward-compatible without
+        # weakening any matching or policy gate.
+        if "stable_id" in data:
+            stable_id = str(data.pop("stable_id"))
+            data.setdefault("id", stable_id)
+            data.setdefault("source", stable_id.split(":", 1)[0])
+            data.setdefault("canonical_url", "")
+            aliases = {
+                "issue": "issue_number",
+                "fit": "fit_score",
+                "confidence": "confidence_score",
+                "priority": "priority_score",
+                "conversion": "conversion_signal",
+                "verified_at": "last_verified_utc",
+            }
+            for old, new in aliases.items():
+                if old in data:
+                    data.setdefault(new, data.pop(old))
+            data.pop("status", None)
+            stage_value = data.get("stage", Stage.DISCOVERED)
+            if "decision" not in data and stage_value in {
+                Stage.QUALIFIED.value,
+                Stage.REVIEWING.value,
+                Stage.APPLIED.value,
+                Stage.OA.value,
+                Stage.INTERVIEW.value,
+                Stage.OFFER.value,
+                Stage.OFFER_ACCEPTED.value,
+            }:
+                data["decision"] = Decision.SURFACED
+            metadata = dict(data.get("metadata") or {})
+            metadata.setdefault("state_schema_normalized_from", "v2_compact_recovery")
+            data["metadata"] = metadata
+
         data["kind"] = OpportunityKind(data["kind"])
         data["decision"] = Decision(data.get("decision", Decision.DISCOVERED))
         data["stage"] = Stage(data.get("stage", Stage.DISCOVERED))
