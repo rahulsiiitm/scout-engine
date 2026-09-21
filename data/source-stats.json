@@ -2,18 +2,36 @@
   "version": 1,
   "sources": [
     {
-      "source": "kaggle",
-      "known": 3,
-      "surfaced": 3,
+      "source": "hiredoor",
+      "known": 5,
+      "surfaced": 5,
       "applied": 0,
       "interviews": 0,
       "stale_or_expired": 0,
       "qualified_yield": 1.0
     },
     {
-      "source": "hiredoor",
-      "known": 2,
-      "surfaced": 2,
+      "source": "amazon",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "certa",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "flam",
+      "known": 1,
+      "surfaced": 1,
       "applied": 0,
       "interviews": 0,
       "stale_or_expired": 0,
@@ -29,6 +47,42 @@
       "qualified_yield": 1.0
     },
     {
+      "source": "nevonai",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "sppuengineers",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "stackbinary",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
+      "source": "wellfound",
+      "known": 1,
+      "surfaced": 1,
+      "applied": 1,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 1.0
+    },
+    {
       "source": "yc",
       "known": 1,
       "surfaced": 1,
@@ -38,35 +92,8 @@
       "qualified_yield": 1.0
     },
     {
-      "source": "amazon",
-      "known": 2,
-      "surfaced": 1,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 0,
-      "qualified_yield": 0.5
-    },
-    {
-      "source": "devpost",
-      "known": 2,
-      "surfaced": 1,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 1,
-      "qualified_yield": 0.5
-    },
-    {
-      "source": "wellfound",
-      "known": 3,
-      "surfaced": 1,
-      "applied": 1,
-      "interviews": 0,
-      "stale_or_expired": 0,
-      "qualified_yield": 0.333
-    },
-    {
       "source": "ashby",
-      "known": 225,
+      "known": 223,
       "surfaced": 2,
       "applied": 1,
       "interviews": 0,
@@ -75,16 +102,16 @@
     },
     {
       "source": "greenhouse",
-      "known": 372,
-      "surfaced": 1,
+      "known": 374,
+      "surfaced": 2,
       "applied": 0,
       "interviews": 0,
       "stale_or_expired": 0,
-      "qualified_yield": 0.003
+      "qualified_yield": 0.005
     },
     {
       "source": "career_page",
-      "known": 35,
+      "known": 31,
       "surfaced": 0,
       "applied": 0,
       "interviews": 0,
