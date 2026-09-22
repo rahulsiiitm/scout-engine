@@ -1,6 +1,6 @@
 import pytest
 
-from scout_engine.models import Opportunity, OpportunityKind, Stage
+from scout_engine.models import Decision, Opportunity, OpportunityKind, Stage
 
 
 def make():
@@ -15,3 +15,18 @@ def test_valid_lifecycle():
 def test_invalid_lifecycle_is_rejected():
     with pytest.raises(ValueError):
         make().transition(Stage.INTERVIEW)
+
+
+def test_compact_recovery_title_supplies_missing_company():
+    o = Opportunity.from_dict({
+        "stable_id": "amazon:10496769",
+        "issue": 36,
+        "stage": "qualified",
+        "title": "Amazon — Data Engineer Intern 2027",
+        "kind": "internship",
+    })
+    assert o.company == "Amazon"
+    assert o.id == "amazon:10496769"
+    assert o.issue_number == 36
+    assert o.decision == Decision.SURFACED
+    assert o.metadata["state_schema_normalized_from"] == "v2_compact_recovery"
