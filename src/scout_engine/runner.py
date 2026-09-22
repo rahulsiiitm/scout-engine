@@ -223,6 +223,7 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
         "stale_updates": 0,
     }
     suppression_reasons: Counter[str] = Counter()
+    surfaced_this_run: list[Opportunity] = []
     successful_keys: set[str] = set()
     seen_by_key: dict[str, set[str]] = defaultdict(set)
 
@@ -296,14 +297,33 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                     counters["new_qualified"] += 1
                     if evaluated.kind.value == "internship" and evaluated.conversion_signal == "explicit":
                         counters["new_conversion"] += 1
-                if github and evaluated.issue_number is None:
-                    issue = github.create_issue_for(evaluated, _issue_labels(evaluated, cfg))
-                    evaluated.issue_number = issue
+                if is_new:
+                    surfaced_this_run.append(evaluated)
             elif evaluated.decision == Decision.SUPPRESSED:
                 counters["suppressed"] += 1
                 suppression_reasons[evaluated.suppression_reason or "unknown"] += 1
                 if is_new:
                     _append_suppression(evaluated)
+
+    # Create issues only after the full scan so one prolific employer cannot
+    # monopolize the newest issue cluster. Round-robin companies by priority.
+    if github and surfaced_this_run:
+        buckets: dict[str, list[Opportunity]] = defaultdict(list)
+        for item in sorted(
+            surfaced_this_run,
+            key=lambda x: (x.priority_score or 0.0, x.fit_score or 0.0),
+            reverse=True,
+        ):
+            buckets[item.company.strip().lower()].append(item)
+        diversified: list[Opportunity] = []
+        while buckets:
+            for company in list(buckets):
+                diversified.append(buckets[company].pop(0))
+                if not buckets[company]:
+                    del buckets[company]
+        for item in diversified:
+            if item.issue_number is None:
+                item.issue_number = github.create_issue_for(item, _issue_labels(item, cfg))
 
     counters["stale_updates"] = _mark_source_disappearances(
         by_id,
