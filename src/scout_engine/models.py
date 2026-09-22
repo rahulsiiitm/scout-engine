@@ -171,7 +171,7 @@ class Opportunity:
             for old, new in aliases.items():
                 if old in data:
                     data.setdefault(new, data.pop(old))
-            data.pop("status", None)\n            # Recovery-only annotations are retained as metadata, not model fields.\n            for legacy_key in ("verified_open", "evidence_matches"):\n                if legacy_key in data:\n                    metadata_value = data.pop(legacy_key)\n                    data.setdefault("metadata", {})[legacy_key] = metadata_value
+            data.pop("status", None)\n            # Recovery-only annotations are retained as metadata, not model fields.\n            legacy_metadata: dict[str, Any] = {}\n            for legacy_key in ("verified_open", "evidence_matches"):\n                if legacy_key in data:\n                    legacy_metadata[legacy_key] = data.pop(legacy_key)
 
             # Compact recovery records historically stored company and role in a
             # single display title ("Company — Role"). Recover only the missing
