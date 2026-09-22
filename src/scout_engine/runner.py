@@ -258,6 +258,11 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                 raw.stage = old.stage
                 raw.issue_number = old.issue_number
                 raw.source_urls = sorted(set(old.source_urls + raw.source_urls + [raw.canonical_url]))
+                # Funnel history is authoritative. Re-discovery may refresh evidence,
+                # but must never demote an already-actioned opportunity into suppression.
+                if old.stage in {Stage.APPLIED, Stage.OA, Stage.INTERVIEW, Stage.OFFER, Stage.OFFER_ACCEPTED}:
+                    raw.decision = old.decision
+                    raw.suppression_reason = old.suppression_reason
             raw.last_seen_utc = datetime.now(timezone.utc).isoformat()
             raw.last_verified_utc = raw.last_verified_utc or raw.last_seen_utc
             evaluated = evaluate(
@@ -266,6 +271,10 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                 existing=list(by_id.values()),
                 config=cfg,
             )
+            if old and old.stage in {Stage.APPLIED, Stage.OA, Stage.INTERVIEW, Stage.OFFER, Stage.OFFER_ACCEPTED}:
+                evaluated.stage = old.stage
+                evaluated.decision = Decision.SURFACED
+                evaluated.suppression_reason = None
             if evaluated.id != raw.id:
                 counters["duplicates"] += 1
                 seen_by_key[source_key].add(evaluated.id)
