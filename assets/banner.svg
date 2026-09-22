@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="480" viewBox="0 0 1600 480">
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111f"/><stop offset=".55" stop-color="#172a48"/><stop offset="1" stop-color="#e66a42"/></linearGradient>
+ <linearGradient id="red" x1="0" x2="1"><stop stop-color="#D62E37"/><stop offset="1" stop-color="#ff4a4f"/></linearGradient>
+</defs>
+<rect width="1600" height="480" rx="18" fill="url(#sky)"/>
+<path d="M0 330L180 180 300 285 450 125 610 300 760 215 900 345V480H0Z" fill="#08111d" opacity=".92"/>
+<path d="M690 480L930 300 1030 360 1170 220 1320 345 1450 255 1600 355V480Z" fill="#050b13" opacity=".88"/>
+<circle cx="1325" cy="175" r="48" fill="#ffd787" opacity=".95"/>
+<circle cx="1325" cy="175" r="80" fill="#ffb25f" opacity=".12"/>
+<g transform="translate(70 80)">
+ <circle cx="48" cy="52" r="37" fill="none" stroke="#D62E37" stroke-width="5"/>
+ <path d="M48 4l10 31 31 10-31 10-10 31-10-31L7 45l31-10z" fill="none" stroke="#D62E37" stroke-width="4"/>
+ <text x="112" y="75" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="800" fill="#fff">Scout <tspan fill="#D62E37">Engine</tspan></text>
+ <text x="116" y="120" font-family="Arial,Helvetica,sans-serif" font-size="21" letter-spacing="8" fill="#c8d0dc">FIND TODAY. BUILD TOMORROW.</text>
+</g>
+<g font-family="Arial,Helvetica,sans-serif" fill="#eef2f7">
+ <g transform="translate(82 292)"><text font-size="20" font-weight="700">DISCOVER</text><text y="27" font-size="14" fill="#aab4c3">real opportunities</text></g>
+ <g transform="translate(260 292)"><text font-size="20" font-weight="700">VERIFY</text><text y="27" font-size="14" fill="#aab4c3">evidence + eligibility</text></g>
+ <g transform="translate(448 292)"><text font-size="20" font-weight="700">FILTER</text><text y="27" font-size="14" fill="#aab4c3">quality over quantity</text></g>
+ <g transform="translate(640 292)"><text font-size="20" font-weight="700">TRACK</text><text y="27" font-size="14" fill="#aab4c3">application to offer</text></g>
+</g>
+<rect x="82" y="365" width="690" height="2" fill="url(#red)" opacity=".8"/>
+<text x="82" y="410" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="5" fill="#aeb8c7">JOBS / INTERNSHIPS / NEW-GRAD / GLOBAL / EVIDENCE-FIRST</text>
+<g transform="translate(1160 225)" fill="#050b13"><circle cx="55" cy="18" r="22"/><path d="M32 48q23-20 46 0l17 105H18z"/><rect x="13" y="66" width="19" height="92" rx="8"/><rect x="80" y="66" width="19" height="92" rx="8"/></g>
+<text x="1080" y="405" font-family="Georgia,serif" font-size="24" font-style="italic" fill="#fff">A better you, one opportunity at a time.</text>
+<path d="M1080 420q190 28 380-8" fill="none" stroke="#D62E37" stroke-width="4"/>
+<text x="1480" y="55" font-family="Arial" font-size="13" letter-spacing="4" fill="#c8d0dc">V3</text>
+</svg>
