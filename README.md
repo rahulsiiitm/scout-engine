@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Scout Engine banner" width="100%" />
+  <img src="assets/a_wide_cinematic_digital_banner_header_scene_with.png" alt="Scout Engine banner" width="100%" />
 </p>
 
 # Scout Engine 🛰️
