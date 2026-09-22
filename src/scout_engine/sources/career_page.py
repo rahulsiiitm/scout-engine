@@ -22,7 +22,16 @@ from ..discovery.ats_fingerprint import AtsFingerprint, fingerprint_ats_links
 from ..models import Opportunity, OpportunityKind
 
 
-_JOB_HINTS = ("job", "jobs", "career", "careers", "opening", "openings", "position", "positions", "vacancy", "vacancies")
+_JOB_HINTS = ("job", "jobs", "opening", "openings", "position", "positions", "vacancy", "vacancies")
+_GENERIC_TITLES = ("careers", "career", "jobs", "join our team", "join the team", "work with us", "open roles", "open positions")
+
+
+def _looks_like_detail_url(url: str) -> bool:
+    path = urlsplit(url).path.lower().rstrip("/")
+    if not path:
+        return False
+    segments = [segment for segment in path.split("/") if segment]
+    return any(hint in segments[:-1] for hint in ("job", "jobs", "opening", "openings", "position", "positions", "vacancy", "vacancies")) and len(segments) >= 2
 
 
 def _looks_job_url(url: str) -> bool:
@@ -37,7 +46,9 @@ def _same_host(a: str, b: str) -> bool:
 def _heuristic_opportunity(company: str, source_key: str, url: str, page: ParsedPage) -> Opportunity | None:
     title = page.h1 or page.title
     title = title.split("|")[0].split("—")[0].strip()
-    if not title or len(title) > 160 or not _looks_job_url(url):
+    if not title or len(title) > 160 or not _looks_like_detail_url(url):
+        return None
+    if title.strip().lower() in _GENERIC_TITLES or title.lower().startswith("join the "):
         return None
     text = page.text[:25_000]
     lower = f"{title} {text[:1500]}".lower()
