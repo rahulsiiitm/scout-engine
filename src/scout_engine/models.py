@@ -8,13 +8,13 @@ from typing import Any
 class OpportunityKind(str, Enum):
     INTERNSHIP = "internship"
     FULL_TIME = "full_time"
-    COMPETITION = "competition"
+    COMPETITION = "competition"\n    HACKATHON = "hackathon"\n    CONTRACT = "contract"
 
 
 class Decision(str, Enum):
     DISCOVERED = "discovered"
     SURFACED = "surfaced"
-    SUPPRESSED = "suppressed"
+    SUPPRESSED = "suppressed"\n    EXPIRED = "expired"
 
 
 class Stage(str, Enum):
@@ -58,10 +58,27 @@ class Compensation:
     period: str = "year"
     verified: bool = False
     source_url: str | None = None
-    normalized_min_inr: float | None = None
-    normalized_max_inr: float | None = None
+    source: str | None = None
+    verified_at: str | None = None
+    converted_min_annual_inr: float | None = None
+    converted_max_annual_inr: float | None = None
     fx_rate: float | None = None
-    fx_date: str | None = None
+    fx_rate_date: str | None = None
+    fx_source: str | None = None
+
+    @property
+    def min_lpa_inr(self) -> float | None:
+        value = self.converted_min_annual_inr
+        if value is None and self.currency.upper() == "INR" and self.min_annual is not None:
+            value = float(self.min_annual) * (12.0 if self.period == "month" else 1.0)
+        return None if value is None else value / 100_000.0
+
+    @property
+    def max_lpa_inr(self) -> float | None:
+        value = self.converted_max_annual_inr
+        if value is None and self.currency.upper() == "INR" and self.max_annual is not None:
+            value = float(self.max_annual) * (12.0 if self.period == "month" else 1.0)
+        return None if value is None else value / 100_000.0
 
 
 @dataclass
@@ -154,7 +171,7 @@ class Opportunity:
             for old, new in aliases.items():
                 if old in data:
                     data.setdefault(new, data.pop(old))
-            data.pop("status", None)
+            data.pop("status", None)\n            # Recovery-only annotations are retained as metadata, not model fields.\n            for legacy_key in ("verified_open", "evidence_matches"):\n                if legacy_key in data:\n                    metadata_value = data.pop(legacy_key)\n                    data.setdefault("metadata", {})[legacy_key] = metadata_value
 
             # Compact recovery records historically stored company and role in a
             # single display title ("Company — Role"). Recover only the missing
