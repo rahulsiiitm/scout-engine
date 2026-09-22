@@ -33,14 +33,15 @@ class Stage(str, Enum):
     CLOSED = "closed"
     EXPIRED = "expired"
     WITHDRAWN = "withdrawn"
+    NOT_PURSUING = "not_pursuing"
 
 
-TERMINAL_STAGES = {Stage.OFFER_ACCEPTED, Stage.REJECTED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN}
+TERMINAL_STAGES = {Stage.OFFER_ACCEPTED, Stage.REJECTED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN, Stage.NOT_PURSUING}
 
 ALLOWED_STAGE_TRANSITIONS: dict[Stage, set[Stage]] = {
-    Stage.DISCOVERED: {Stage.QUALIFIED, Stage.CLOSED, Stage.EXPIRED},
-    Stage.QUALIFIED: {Stage.REVIEWING, Stage.APPLIED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN},
-    Stage.REVIEWING: {Stage.APPLIED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN},
+    Stage.DISCOVERED: {Stage.QUALIFIED, Stage.CLOSED, Stage.EXPIRED, Stage.NOT_PURSUING},
+    Stage.QUALIFIED: {Stage.REVIEWING, Stage.APPLIED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN, Stage.NOT_PURSUING},
+    Stage.REVIEWING: {Stage.APPLIED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN, Stage.NOT_PURSUING},
     Stage.APPLIED: {Stage.OA, Stage.INTERVIEW, Stage.OFFER, Stage.REJECTED, Stage.CLOSED, Stage.WITHDRAWN},
     Stage.OA: {Stage.INTERVIEW, Stage.OFFER, Stage.REJECTED, Stage.CLOSED, Stage.WITHDRAWN},
     Stage.INTERVIEW: {Stage.OFFER, Stage.REJECTED, Stage.CLOSED, Stage.WITHDRAWN},
@@ -50,6 +51,7 @@ ALLOWED_STAGE_TRANSITIONS: dict[Stage, set[Stage]] = {
     Stage.CLOSED: set(),
     Stage.EXPIRED: set(),
     Stage.WITHDRAWN: set(),
+    Stage.NOT_PURSUING: set(),
 }
 
 
