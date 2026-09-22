@@ -185,3 +185,26 @@ def test_ashby_parses_published_workplace_and_employment(monkeypatch):
     assert item.kind == OpportunityKind.INTERNSHIP
     assert item.workplace_type == "Hybrid"
     assert item.posted_at_utc.startswith("2026-09-18T10:00:00")
+
+
+def test_heuristic_rejects_career_index_page():
+    from scout_engine.crawl.html import parse_html_page
+    from scout_engine.sources.career_page import _heuristic_opportunity
+    page = parse_html_page(
+        "https://example.com/company/careers",
+        "<html><body><h1>Join Our Team</h1><p>Engineering careers and open roles. Experience great work.</p></body></html>",
+    )
+    assert _heuristic_opportunity("Example", "career:example.com", "https://example.com/company/careers", page) is None
+
+
+def test_compact_recovery_preserves_annotations_in_metadata():
+    item = Opportunity.from_dict({
+        "stable_id": "amazon:1",
+        "title": "Amazon — Software Engineer Intern",
+        "kind": "internship",
+        "stage": "qualified",
+        "verified_open": "2026-09-22",
+        "evidence_matches": ["python"],
+    })
+    assert item.metadata["verified_open"] == "2026-09-22"
+    assert item.metadata["evidence_matches"] == ["python"]
