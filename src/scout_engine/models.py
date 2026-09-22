@@ -202,6 +202,7 @@ class Opportunity:
             }:
                 data["decision"] = Decision.SURFACED
             metadata = dict(data.get("metadata") or {})
+            metadata.update(legacy_metadata)
             metadata.setdefault("state_schema_normalized_from", "v2_compact_recovery")
             data["metadata"] = metadata
 
