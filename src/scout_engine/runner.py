@@ -230,6 +230,8 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
         counters["sources_attempted"] += 1
         try:
             fetched = adapter.fetch()
+            if not isinstance(fetched, list):
+                raise TypeError(f"adapter returned {type(fetched).__name__}, expected list")
         except Exception as exc:
             counters["errors"] += 1
             _append_run_log(adapter.source_key, f"adapter error: {exc}")
@@ -239,7 +241,12 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
         successful_keys.update(adapter.effective_source_keys())
         counters["fetched"] += len(fetched)
         for raw in fetched:
-            raw = enrich_opportunity(raw)
+            try:
+                raw = enrich_opportunity(raw)
+            except Exception as exc:
+                counters["errors"] += 1
+                _append_run_log(adapter.source_key, f"enrichment error for {getattr(raw, 'id', 'unknown')}: {exc}")
+                continue
             source_key = str(raw.metadata.get("source_key") or adapter.source_key)
             raw.metadata["source_key"] = source_key
             successful_keys.add(source_key)
@@ -268,6 +275,11 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                 seen_by_key[discovered_via].add(evaluated.id)
             is_new = old is None and evaluated.id == raw.id
             by_id[evaluated.id] = evaluated
+
+            if evaluated.kind.value in {"competition", "hackathon"}:
+                # Competitions remain outside the production career-opportunity lane.
+                evaluated.decision = Decision.SUPPRESSED
+                evaluated.suppression_reason = "competition excluded from career production lane"
 
             if evaluated.decision == Decision.SURFACED:
                 counters["surfaced"] += 1
