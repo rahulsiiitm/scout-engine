@@ -1,27 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 
-class OpportunityKind(StrEnum):
-    FULL_TIME = "full_time"
+class OpportunityKind(str, Enum):
     INTERNSHIP = "internship"
-    CONTRACT = "contract"
+    FULL_TIME = "full_time"
     COMPETITION = "competition"
-    HACKATHON = "hackathon"
 
 
-class Decision(StrEnum):
+class Decision(str, Enum):
     DISCOVERED = "discovered"
     SURFACED = "surfaced"
     SUPPRESSED = "suppressed"
-    EXPIRED = "expired"
 
 
-class Stage(StrEnum):
+class Stage(str, Enum):
     DISCOVERED = "discovered"
     QUALIFIED = "qualified"
     REVIEWING = "reviewing"
@@ -31,69 +27,44 @@ class Stage(StrEnum):
     OFFER = "offer"
     OFFER_ACCEPTED = "offer_accepted"
     REJECTED = "rejected"
-    WITHDRAWN = "withdrawn"
+    CLOSED = "closed"
     EXPIRED = "expired"
-    NOT_PURSUING = "not_pursuing"
+    WITHDRAWN = "withdrawn"
 
 
-TERMINAL_STAGES = {
-    Stage.OFFER_ACCEPTED,
-    Stage.REJECTED,
-    Stage.WITHDRAWN,
-    Stage.EXPIRED,
-    Stage.NOT_PURSUING,
-}
+TERMINAL_STAGES = {Stage.OFFER_ACCEPTED, Stage.REJECTED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN}
 
 ALLOWED_STAGE_TRANSITIONS: dict[Stage, set[Stage]] = {
-    Stage.DISCOVERED: {Stage.QUALIFIED, Stage.NOT_PURSUING, Stage.EXPIRED},
-    Stage.QUALIFIED: {Stage.REVIEWING, Stage.APPLIED, Stage.NOT_PURSUING, Stage.EXPIRED},
-    Stage.REVIEWING: {Stage.QUALIFIED, Stage.APPLIED, Stage.NOT_PURSUING, Stage.EXPIRED},
-    Stage.APPLIED: {Stage.OA, Stage.INTERVIEW, Stage.OFFER, Stage.REJECTED, Stage.WITHDRAWN},
-    Stage.OA: {Stage.INTERVIEW, Stage.OFFER, Stage.REJECTED, Stage.WITHDRAWN},
-    Stage.INTERVIEW: {Stage.OFFER, Stage.REJECTED, Stage.WITHDRAWN},
-    Stage.OFFER: {Stage.OFFER_ACCEPTED, Stage.WITHDRAWN},
+    Stage.DISCOVERED: {Stage.QUALIFIED, Stage.CLOSED, Stage.EXPIRED},
+    Stage.QUALIFIED: {Stage.REVIEWING, Stage.APPLIED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN},
+    Stage.REVIEWING: {Stage.APPLIED, Stage.CLOSED, Stage.EXPIRED, Stage.WITHDRAWN},
+    Stage.APPLIED: {Stage.OA, Stage.INTERVIEW, Stage.OFFER, Stage.REJECTED, Stage.CLOSED, Stage.WITHDRAWN},
+    Stage.OA: {Stage.INTERVIEW, Stage.OFFER, Stage.REJECTED, Stage.CLOSED, Stage.WITHDRAWN},
+    Stage.INTERVIEW: {Stage.OFFER, Stage.REJECTED, Stage.CLOSED, Stage.WITHDRAWN},
+    Stage.OFFER: {Stage.OFFER_ACCEPTED, Stage.REJECTED, Stage.CLOSED, Stage.WITHDRAWN},
     Stage.OFFER_ACCEPTED: set(),
     Stage.REJECTED: set(),
-    Stage.WITHDRAWN: set(),
+    Stage.CLOSED: set(),
     Stage.EXPIRED: set(),
-    Stage.NOT_PURSUING: set(),
+    Stage.WITHDRAWN: set(),
 }
 
 
-def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-@dataclass(slots=True)
+@dataclass
 class Compensation:
-    currency: str = "INR"
+    currency: str
     min_annual: float | None = None
     max_annual: float | None = None
     period: str = "year"
     verified: bool = False
-    source: str | None = None
-    verified_at: str | None = None
-    converted_min_annual_inr: float | None = None
-    converted_max_annual_inr: float | None = None
+    source_url: str | None = None
+    normalized_min_inr: float | None = None
+    normalized_max_inr: float | None = None
     fx_rate: float | None = None
-    fx_rate_date: str | None = None
-    fx_source: str | None = None
-
-    @property
-    def min_lpa_inr(self) -> float | None:
-        amount = self.min_annual
-        if amount is None:
-            return None
-        if self.period == "month":
-            amount *= 12
-        if self.currency.upper() == "INR":
-            return amount / 100_000
-        if self.converted_min_annual_inr is not None:
-            return self.converted_min_annual_inr / 100_000
-        return None
+    fx_date: str | None = None
 
 
-@dataclass(slots=True)
+@dataclass
 class Opportunity:
     id: str
     company: str
@@ -103,11 +74,11 @@ class Opportunity:
     canonical_url: str
     application_url: str | None = None
     description: str = ""
-    location: str | None = None
-    remote: bool | None = None
+    location: str = ""
+    remote: bool = False
     skills: list[str] = field(default_factory=list)
-    experience_min: float | None = None
-    experience_max: float | None = None
+    experience_min: int | None = None
+    experience_max: int | None = None
     graduation_years: list[int] = field(default_factory=list)
     employment_type_raw: str | None = None
     workplace_type: str | None = None
@@ -115,8 +86,8 @@ class Opportunity:
     deadline_utc: str | None = None
     posted_at_utc: str | None = None
     updated_at_utc: str | None = None
-    first_seen_utc: str = field(default_factory=utc_now_iso)
-    last_seen_utc: str = field(default_factory=utc_now_iso)
+    first_seen_utc: str | None = None
+    last_seen_utc: str | None = None
     last_verified_utc: str | None = None
     compensation: Compensation | None = None
     research_heavy: bool = False
@@ -184,6 +155,16 @@ class Opportunity:
                 if old in data:
                     data.setdefault(new, data.pop(old))
             data.pop("status", None)
+
+            # Compact recovery records historically stored company and role in a
+            # single display title ("Company — Role"). Recover only the missing
+            # required company field; do not infer eligibility or policy evidence.
+            if not data.get("company"):
+                display_title = str(data.get("title") or "")
+                company, separator, _ = display_title.partition(" — ")
+                if separator and company.strip():
+                    data["company"] = company.strip()
+
             stage_value = data.get("stage", Stage.DISCOVERED)
             if "decision" not in data and stage_value in {
                 Stage.QUALIFIED.value,
