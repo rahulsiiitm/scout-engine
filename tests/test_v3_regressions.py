@@ -208,3 +208,10 @@ def test_compact_recovery_preserves_annotations_in_metadata():
     })
     assert item.metadata["verified_open"] == "2026-09-22"
     assert item.metadata["evidence_matches"] == ["python"]
+
+
+def test_employer_round_robin_intent_is_present():
+    source = Path("src/scout_engine/runner.py").read_text(encoding="utf-8")
+    assert "buckets[item.company.strip().lower()].append(item)" in source
+    assert "while buckets:" in source
+    assert "github.create_issue_for(item" in source
