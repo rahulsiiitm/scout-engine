@@ -1,163 +1,123 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Scout Engine banner" width="100%" />
+</p>
+
 # Scout Engine 🛰️
 
-Personal opportunity intelligence infrastructure for high-signal jobs, internships, PPO/conversion paths and selected competitions.
+**An autonomous, evidence-first career opportunity radar.**
 
-Scout Engine V3 turns the repository into a small, auditable career-source intelligence system:
+Scout Engine continuously discovers, verifies, filters and tracks high-signal **new-grad roles** and **final-year internships** from public company career sources. It is deliberately quality-first: an empty slot is better than a fabricated salary, guessed eligibility condition, or weak opportunity.
 
-**discover → normalize → enrich → gate → evidence-match → dedupe → prioritize → track lifecycle → learn from the funnel**
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
+![Version](https://img.shields.io/badge/Scout_Engine-V3-6f42c1)
+![Policy](https://img.shields.io/badge/Policy-Evidence_First-success)
+![Automation](https://img.shields.io/badge/GitHub_Actions-Daily-2088FF)
 
-## V3 architecture
+> **Find today. Build tomorrow.** One verified opportunity at a time.
 
-Scout no longer depends on manually configured ATS boards alone.
+---
 
-For each tracked employer it now prefers the most structured public source available:
+## What it does
 
-1. official/public ATS API
-2. detected `JobPosting` JSON-LD
-3. robots/sitemap-assisted static careers pages
-4. static job-detail HTML
-5. Playwright browser fallback only when required
+Scout turns a messy universe of career pages into an auditable pipeline:
 
-If a career page points to Greenhouse, Lever, Ashby, Workable or SmartRecruiters, Scout promotes that source back into the structured adapter path rather than continuing to scrape HTML.
+```text
+Discover → Normalize → Enrich → Verify → Gate → Dedupe → Prioritize → Track → Learn
+```
 
-The crawler:
+It prefers structured sources first, promotes detected ATS fingerprints into native adapters, falls back to standards-aware career-page crawling when necessary, and uses browser rendering only as the final public-web fallback.
 
-- obeys `robots.txt`
-- fails closed when robots infrastructure is unavailable due server/network errors
-- rejects private/local network targets and unsafe URL schemes
-- caps response sizes and redirects
-- never logs in, bypasses CAPTCHAs, rotates proxies, or crawls private portals
-- uses conditional `ETag` / `Last-Modified` requests for cached career pages
-- treats a failed source scan as **no evidence of closure**
+### The target
 
-## Candidate target
+The production goal is **up to 10 NEW qualified career opportunities per daily run**, without lowering quality gates to fill a quota.
 
-Machine-readable candidate strategy lives in [`config/profile.yaml`](config/profile.yaml).
+- New-grad / entry-level full-time roles with verified minimum base compensation **> ₹10 LPA**
+- Final-year internships, with explicit PPO / return-offer / full-time-conversion evidence receiving special priority
+- Competitions and hackathons excluded from the production career lane
+- Research-heavy roles requiring formal publication evidence blocked when the candidate profile does not satisfy it
 
-Current daily career target:
+---
 
-- up to **10 new qualified career opportunities**
-- roughly 5 new-grad/full-time + 5 internship/PPO/conversion when the market supports it
-- never lower hard gates to fill the target
-- competitions do not count toward the 10
+## Source intelligence
 
-## Source registry
+Scout chooses the strongest public evidence path available:
 
-[`config/companies.yaml`](config/companies.yaml) is the employer-owned careers registry.
+1. **Official ATS / structured API**: Greenhouse, Lever, Ashby, Workable, SmartRecruiters
+2. **JobPosting JSON-LD**
+3. **robots.txt + sitemap-assisted discovery**
+4. **Static job-detail HTML**
+5. **Playwright browser fallback**
 
-[`config/boards.yaml`](config/boards.yaml) holds verified structured ATS identifiers.
+The crawler never logs in, bypasses CAPTCHAs, rotates proxies, or defeats access controls. A blocked or failed source is recorded as a failed scan, **never as evidence that a job disappeared**.
 
-A registry company may only need a domain. Scout can discover a career link, inspect ATS fingerprints, read public structured metadata and fall back to rendered HTML if necessary.
+---
 
-## Structured adapters
+## Evidence-first data model
 
-Native adapters:
+`data/opportunities.json` is the canonical ledger. GitHub Issues are the human-facing cockpit, not the database.
 
-- Greenhouse
-- Lever
-- Ashby
-- Workable
-- SmartRecruiters
+Each opportunity can retain source status, extraction method, application URL, source confidence, field-level provenance, compensation evidence, dated FX conversion, PPO/conversion evidence, first/last-seen timestamps, lifecycle state, and successful-miss counters.
 
-The adapters now retain richer fields where available, including posting dates, workplace/employment type, application URLs and structured compensation.
+### Closure safety
 
-## Canonical state
+A posting is not inferred closed because one crawler had a bad morning.
 
-**`data/opportunities.json` is the source of truth.**
+```text
+source failure        → no closure evidence
+successful scan + hit → missing counter = 0
+successful scan + miss
+                     → missing counter += 1
+2 successful misses  → eligible for inferred expiry
+```
 
-GitHub Issues are the human-facing cockpit. Issue open/closed state never replaces the canonical application lifecycle.
+Applied / OA / interview history is preserved even when the public posting later disappears.
 
-V3 state also retains:
+---
 
-- extraction method
-- source confidence
-- field-level provenance
-- source open/closed status
-- application URL
-- PPO/full-time-conversion signal and evidence
-- successful-miss counter for stale detection
-- dated FX conversion metadata
+## Architecture
 
-## Foreign compensation
+```text
+src/scout_engine/
+├── crawl/          HTTP, robots, sitemap, HTML, JSON-LD, browser fallback
+├── discovery/      employer registry and ATS fingerprinting
+├── enrich/         eligibility, conversion evidence, research and FX
+├── sources/        structured ATS and career-page adapters
+├── engine.py       hard gates + scoring decision path
+├── runner.py       production orchestration and stale reconciliation
+├── github_sync.py  issue/lifecycle synchronization
+└── models.py       canonical contracts and compatibility boundary
 
-Verified non-INR base compensation is converted through the ECB daily reference-rate table while retaining the original amount and currency.
+config/
+├── profile.yaml    candidate facts and hard constraints
+├── companies.yaml  employer-owned career registry
+├── boards.yaml     verified ATS identifiers
+└── sources.yaml    crawler/source policy
 
-The full-time hard gate remains:
+data/
+├── opportunities.json
+├── crawl-cache.json
+├── fx-rates.json
+├── scan-stats.json
+└── source-stats.json
+```
 
-> verified minimum base compensation must be strictly greater than ₹10 LPA
+For the deeper internals, see [Architecture](docs/ARCHITECTURE.md), [Source Intelligence](docs/SOURCE_INTELLIGENCE.md), and [Scoring](SCORING.md).
 
-If salary cannot be verified and converted safely, the full-time opportunity is not surfaced.
+---
 
 ## Lifecycle
 
 ```text
-discovered
-   ↓
-qualified ↔ reviewing
-   ↓
-applied
-   ↓
-OA
-   ↓
-interview
-   ↓
-offer
-   ↓
-offer_accepted
+discovered → qualified → reviewing → applied → OA → interview → offer → offer_accepted
+                    ↘ not_pursuing
+                              ↘ rejected / withdrawn / expired / closed
 ```
 
-Terminal side paths: `rejected`, `withdrawn`, `expired`, `not_pursuing`.
+Application state is explicit. Applying does not automatically close the GitHub issue.
 
-Applying never closes an issue automatically.
+---
 
-A missing job is only expired after **two consecutive successful source scans** fail to see it. Source failures do not count. Applied/OA/interview history is never erased merely because the public posting closes.
-
-## Matching policy
-
-- standard surface threshold: **6/10**
-- high fit: **8/10+**
-- urgent exception floor: **4/10** only with a verified deadline within 5 days
-- full-time compensation: verified base minimum **> ₹10 LPA**
-- research-heavy roles requiring formal publications are blocked unless the profile contains that evidence
-- mid/senior roles are blocked unless the posting explicitly accepts new-grad / 0–2 year candidates
-- explicit PPO/conversion improves action priority, not evidence-based fit
-
-See [`SCORING.md`](SCORING.md).
-
-## Repository map
-
-```text
-src/scout_engine/
-├── crawl/               safe HTTP/browser crawling primitives
-├── discovery/           source registry + ATS fingerprinting
-├── enrich/              eligibility, PPO signals, FX conversion
-├── sources/             ATS + career-page adapters
-├── engine.py            gate/score decision path
-├── runner.py            daily orchestration + stale reconciliation
-└── models.py            canonical data contracts
-
-config/profile.yaml       candidate facts and constraints
-config/sources.yaml       source policy + crawler limits
-config/companies.yaml     employer-owned career registry
-config/boards.yaml        verified ATS identifiers
-
-data/opportunities.json   canonical opportunity history
-data/crawl-cache.json     conditional-request cache
-data/fx-rates.json        dated ECB rate cache
-data/scan-stats.json      latest discovery diagnostics
-daily/                    native daily scan snapshots
-weekly/                   funnel reports
-```
-
-## Automation
-
-- `tests.yml`: regression suite + canonical validation
-- `scout-daily.yml`: **07:37 IST**, shifted away from top-of-hour GitHub Actions congestion
-- `scout-weekly.yml`: weekly funnel refresh
-
-Daily Actions install Chromium only for the browser fallback path.
-
-## Local commands
+## Run it
 
 ```bash
 python -m pip install -e ".[dev,browser]"
@@ -171,17 +131,34 @@ scout-engine weekly
 scout-engine daily
 ```
 
-## Safety rails
+The CI pipeline also exercises the stateful daily path so persisted-schema or crawler integration regressions are caught before the scheduled production run.
 
-- no auto-apply
-- no auto-send outreach
-- no authentication crawling
-- no CAPTCHA/access-control bypass
-- no proxy/stealth scraping
-- no private-network requests
-- no guessed salary, deadline, eligibility or PPO
-- failed source scans cannot close jobs
-- preference learning cannot bypass hard gates
-- every important extracted field can retain provenance
+---
 
-Scout Engine should remain boring where boring is valuable: deterministic policy, explicit evidence, inspectable state, and small replaceable source adapters.
+## Automation
+
+| Workflow | Purpose |
+| --- | --- |
+| `tests.yml` | Unit/regression tests, canonical validation and daily-pipeline smoke test |
+| `scout-daily.yml` | Daily discovery, reconciliation, analytics and state persistence |
+| `scout-weekly.yml` | Weekly funnel report |
+| `sync-labels.yml` | GitHub issue taxonomy synchronization |
+
+The daily workflow is intentionally shifted away from GitHub's top-of-hour congestion window.
+
+---
+
+## Non-negotiable rails
+
+Scout will not auto-apply, auto-send outreach, guess salary/PPO/deadlines/eligibility, crawl authenticated/private systems, bypass robots/access controls, use source failures as closure evidence, or let learned preferences override hard gates.
+
+**Quality over quota. Evidence over inference. State over vibes.** 🔭
+
+---
+
+## Author
+
+**Rahul Sharma**  
+B.Tech CSE (AI & Data Science), IIIT Manipur
+
+Built as personal career infrastructure: less tab-hoarding, more verified signal.
