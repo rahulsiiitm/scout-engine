@@ -163,8 +163,13 @@ class Opportunity:
         if "stable_id" in data:
             stable_id = str(data.pop("stable_id"))
             data.setdefault("id", stable_id)
-            data.setdefault("source", stable_id.split(":", 1)[0])
-            data.setdefault("canonical_url", "")
+            compact_source = data.get("source")
+            if isinstance(compact_source, str) and compact_source.startswith(("http://", "https://")):
+                data.setdefault("canonical_url", compact_source)
+                data["source"] = stable_id.split(":", 1)[0]
+            else:
+                data.setdefault("source", stable_id.split(":", 1)[0])
+                data.setdefault("canonical_url", "")
             aliases = {
                 "issue": "issue_number",
                 "fit": "fit_score",
@@ -177,15 +182,11 @@ class Opportunity:
                 if old in data:
                     data.setdefault(new, data.pop(old))
             data.pop("status", None)
-            # Recovery-only annotations are retained as metadata, not model fields.
             legacy_metadata: dict[str, Any] = {}
             for legacy_key in ("verified_open", "evidence_matches"):
                 if legacy_key in data:
                     legacy_metadata[legacy_key] = data.pop(legacy_key)
 
-            # Compact recovery records historically stored company and role in a
-            # single display title ("Company — Role"). Recover only the missing
-            # required company field; do not infer eligibility or policy evidence.
             if not data.get("company"):
                 display_title = str(data.get("title") or "")
                 company, separator, _ = display_title.partition(" — ")
@@ -194,13 +195,8 @@ class Opportunity:
 
             stage_value = data.get("stage", Stage.DISCOVERED)
             if "decision" not in data and stage_value in {
-                Stage.QUALIFIED.value,
-                Stage.REVIEWING.value,
-                Stage.APPLIED.value,
-                Stage.OA.value,
-                Stage.INTERVIEW.value,
-                Stage.OFFER.value,
-                Stage.OFFER_ACCEPTED.value,
+                Stage.QUALIFIED.value, Stage.REVIEWING.value, Stage.APPLIED.value,
+                Stage.OA.value, Stage.INTERVIEW.value, Stage.OFFER.value, Stage.OFFER_ACCEPTED.value,
             }:
                 data["decision"] = Decision.SURFACED
             metadata = dict(data.get("metadata") or {})
@@ -219,5 +215,23 @@ class Opportunity:
             if "max_monthly" in compensation:
                 compensation.setdefault("max_annual", compensation.pop("max_monthly"))
                 compensation.setdefault("period", "month")
+            # Compact daily snapshots used short salary/FX keys. Preserve their
+            # verified numeric evidence while translating to the canonical model.
+            if "min" in compensation:
+                compensation.setdefault("min_annual", compensation.pop("min"))
+            if "max" in compensation:
+                compensation.setdefault("max_annual", compensation.pop("max"))
+            if "min_inr_lpa" in compensation:
+                lpa = compensation.pop("min_inr_lpa")
+                compensation.setdefault("converted_min_annual_inr", float(lpa) * 100_000)
+            if "max_inr_lpa" in compensation:
+                lpa = compensation.pop("max_inr_lpa")
+                compensation.setdefault("converted_max_annual_inr", float(lpa) * 100_000)
+            if "fx_date" in compensation:
+                compensation.setdefault("fx_rate_date", compensation.pop("fx_date"))
+            # Historical compact snapshots stored currency-specific FX names.
+            for key in list(compensation):
+                if key.endswith("_inr") and key not in {"converted_min_annual_inr", "converted_max_annual_inr"}:
+                    compensation.setdefault("fx_rate", compensation.pop(key))
             data["compensation"] = Compensation(**compensation)
         return cls(**data)
