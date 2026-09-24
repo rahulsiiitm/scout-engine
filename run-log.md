@@ -31,3 +31,5 @@ Only source failures, access problems, and material run warnings belong here.
 | 2026-09-23 13:14 | career:nvidia.com | adapter error: NVIDIA: robots.txt disallows https://jobs.nvidia.com/ |
 | 2026-09-23 13:14 | career:qualcomm.com | adapter error: Qualcomm: robots.txt disallows https://careers.qualcomm.com/careers |
 | 2026-09-23 13:14 | career:uber.com | adapter error: Uber: career page returned HTTP 403 |
+| 2026-09-24 07:30 | canonical-state | `data/opportunities.json` was empty again; rebuilt canonical V2 dedupe ledger from cockpit stable IDs and today's verified records. Repeated empty-state regression needs code-level repair. |
+| 2026-09-24 07:30 | extractor/classifier | Invalid Cohere Senior, Mistral Director, and Anthropic Director roles were recreated as #51-#53 and misclassified as internships; closed again. Pre-issue seniority/title guard remains broken. |
