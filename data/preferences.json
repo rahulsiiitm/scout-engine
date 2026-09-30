@@ -2,22 +2,28 @@
   "version": 1,
   "note": "Bounded ranking nudges only; never bypass hard gates or alter fit score.",
   "role_weights": {
-    "unknown": 0.03
+    "unknown": -0.189
   },
   "source_weights": {
-    "amazon": 0.0,
-    "ashby": 0.045,
+    "amazon": -0.167,
+    "ashby": -0.083,
     "certa": 0.0,
+    "devpost": -0.5,
+    "domino": 0.0,
     "flam": 0.0,
     "gc": 0.0,
-    "greenhouse": 0.0,
+    "greenboard": 0.0,
+    "greenhouse": -0.25,
     "hiredoor": 0.0,
+    "kaggle": -0.5,
     "linkedin": 0.0,
     "nevonai": 0.0,
     "optiver": 0.0,
+    "scale": 0.0,
     "sppuengineers": 0.0,
     "stackbinary": 0.0,
-    "wellfound": 0.125,
+    "together-ai": 0.0,
+    "wellfound": -0.375,
     "yc": 0.0
   }
 }
