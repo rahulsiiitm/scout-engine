@@ -82,6 +82,19 @@ def research_gate(opportunity: Opportunity, candidate_has_publications: bool = F
     return GateResult(True)
 
 
+
+def candidate_stage_gate(opportunity: Opportunity) -> GateResult:
+    """Block only explicit posting text that rejects students/new graduates."""
+    text = f"{opportunity.title}\n{opportunity.description}"
+    patterns = (
+        r"\b(?:new grads?|new graduates?|current students?)\b.{0,80}\b(?:auto[- ]?rejected|automatically rejected|not eligible|ineligible|not considered)\b",
+        r"\b(?:not accepting|do not accept|not open to)\b.{0,80}\b(?:new grads?|new graduates?|current students?)\b",
+    )
+    if any(re.search(pattern, text, flags=re.IGNORECASE | re.DOTALL) for pattern in patterns):
+        return GateResult(False, "posting explicitly excludes new graduates/current students")
+    return GateResult(True)
+
+
 def deadline_gate(opportunity: Opportunity, now: datetime | None = None) -> GateResult:
     if not opportunity.deadline_utc:
         return GateResult(True)
@@ -100,6 +113,7 @@ def apply_hard_gates(
     now: datetime | None = None,
 ) -> GateResult:
     gates = (
+        candidate_stage_gate(opportunity),
         salary_gate(opportunity, minimum_lpa_exclusive),
         seniority_gate(opportunity, max_years_without_override),
         graduation_gate(opportunity, candidate_graduation_year),
