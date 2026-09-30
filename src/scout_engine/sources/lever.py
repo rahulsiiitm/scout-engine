@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timezone
 
 from .base import SourceAdapter, get_json
+from ..kind import infer_opportunity_kind
 from ..models import Compensation, Opportunity, OpportunityKind
 
 
@@ -49,7 +50,7 @@ class LeverAdapter(SourceAdapter):
         for job in data:
             title = job.get("text", "")
             commitment = ((job.get("categories") or {}).get("commitment") or "").lower()
-            kind = OpportunityKind.INTERNSHIP if "intern" in title.lower() or "intern" in commitment else OpportunityKind.FULL_TIME
+            kind = infer_opportunity_kind(title, commitment)
             location = (job.get("categories") or {}).get("location")
             workplace = job.get("workplaceType")
             description = " ".join(
