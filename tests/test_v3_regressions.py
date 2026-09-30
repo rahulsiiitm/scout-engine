@@ -8,7 +8,9 @@ from scout_engine.discovery.ats_fingerprint import fingerprint_ats_url
 from scout_engine.discovery.registry import load_company_registry
 from scout_engine.enrich.conversion import detect_conversion_signal
 from scout_engine.enrich.eligibility import extract_experience
+from scout_engine.kind import infer_opportunity_kind
 from scout_engine.models import Compensation, Opportunity, OpportunityKind
+from scout_engine.policies import seniority_gate
 from scout_engine.scoring import confidence_score
 from scout_engine.sources import ashby as ashby_mod
 from scout_engine.sources import lever as lever_mod
@@ -215,3 +217,33 @@ def test_employer_round_robin_intent_is_present():
     assert "buckets[item.company.strip().lower()].append(item)" in source
     assert "while buckets:" in source
     assert "github.create_issue_for(item" in source
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Director, US International Tax",
+        "Senior Full-Stack Engineer, Internal Applications",
+        "Director of Internal Control",
+    ],
+)
+def test_internal_and_international_are_not_internships(title):
+    assert infer_opportunity_kind(title) == OpportunityKind.FULL_TIME
+
+
+def test_real_internship_still_classifies_as_internship():
+    assert infer_opportunity_kind("Software Engineering Intern") == OpportunityKind.INTERNSHIP
+
+
+def test_clear_senior_full_time_title_is_hard_gated_without_new_grad_override():
+    item = Opportunity(
+        id="senior",
+        company="Example",
+        title="Senior Backend Engineer",
+        kind=OpportunityKind.FULL_TIME,
+        source="test",
+        canonical_url="https://example.com/senior",
+    )
+    result = seniority_gate(item)
+    assert result.passed is False
+    assert "senior-level" in result.reason
