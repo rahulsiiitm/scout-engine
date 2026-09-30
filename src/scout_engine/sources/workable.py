@@ -4,6 +4,7 @@ import html
 import re
 
 from .base import SourceAdapter, get_json
+from ..kind import infer_opportunity_kind
 from ..models import Opportunity, OpportunityKind
 
 
@@ -28,13 +29,7 @@ class WorkableAdapter(SourceAdapter):
         for job in data.get("jobs", []):
             title = job.get("title") or job.get("full_title") or ""
             employment = str(job.get("employment_type") or job.get("type") or "")
-            lower = f"{title} {employment}".lower()
-            if "intern" in lower:
-                kind = OpportunityKind.INTERNSHIP
-            elif "contract" in lower or "temporary" in lower:
-                kind = OpportunityKind.CONTRACT
-            else:
-                kind = OpportunityKind.FULL_TIME
+            kind = infer_opportunity_kind(title, employment)
             location_parts = [job.get("city"), job.get("state"), job.get("country")]
             location = ", ".join(x for x in location_parts if x)
             url = job.get("url") or job.get("shortlink") or job.get("application_url") or ""
