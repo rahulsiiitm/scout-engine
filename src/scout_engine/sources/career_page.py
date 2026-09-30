@@ -19,6 +19,7 @@ from ..crawl.jsonld import opportunities_from_jsonld
 from ..crawl.robots import RobotsPolicy
 from ..crawl.sitemap import parse_sitemap
 from ..discovery.ats_fingerprint import AtsFingerprint, fingerprint_ats_links
+from ..kind import infer_opportunity_kind
 from ..models import Opportunity, OpportunityKind
 
 
@@ -54,7 +55,7 @@ def _heuristic_opportunity(company: str, source_key: str, url: str, page: Parsed
     lower = f"{title} {text[:1500]}".lower()
     if not any(token in lower for token in ("responsibil", "qualification", "requirements", "experience", "intern", "engineer", "developer")):
         return None
-    kind = OpportunityKind.INTERNSHIP if "intern" in title.lower() else OpportunityKind.FULL_TIME
+    kind = infer_opportunity_kind(title)
     digest = hashlib.sha1(f"{company}|{url}|{title}".encode()).hexdigest()[:16]
     return Opportunity(
         id=f"career:{(urlsplit(url).hostname or 'site').lower()}:{digest}",
