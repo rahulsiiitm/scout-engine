@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timezone
 
 from .base import SourceAdapter, get_json
+from ..kind import infer_opportunity_kind
 from ..models import Compensation, Opportunity, OpportunityKind
 from ..time_utils import to_utc_iso
 
@@ -68,13 +69,7 @@ class AshbyAdapter(SourceAdapter):
         for job in data.get("jobs", []):
             title = job.get("title", "")
             employment = str(job.get("employmentType") or "")
-            lower = f"{title} {employment}".lower()
-            if "intern" in lower:
-                kind = OpportunityKind.INTERNSHIP
-            elif "contract" in lower or "temporary" in lower:
-                kind = OpportunityKind.CONTRACT
-            else:
-                kind = OpportunityKind.FULL_TIME
+            kind = infer_opportunity_kind(title, employment)
             location = job.get("location")
             secondary = [x.get("location") for x in (job.get("secondaryLocations") or []) if x.get("location")]
             if secondary:
