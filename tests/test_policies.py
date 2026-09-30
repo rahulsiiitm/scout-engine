@@ -1,5 +1,5 @@
 from scout_engine.models import Compensation, Opportunity, OpportunityKind
-from scout_engine.policies import graduation_gate, research_gate, salary_gate, seniority_gate
+from scout_engine.policies import candidate_stage_gate, graduation_gate, research_gate, salary_gate, seniority_gate
 
 
 def opp(**overrides):
@@ -55,3 +55,16 @@ def test_explicit_graduation_year_mismatch_is_blocked():
 
 def test_explicit_2027_graduation_is_allowed():
     assert graduation_gate(opp(graduation_years=[2027]), 2027).passed is True
+
+
+def test_explicit_new_grad_autorejection_is_blocked():
+    o = opp(
+        title="Member of Technical Staff, Early Career",
+        description="All applications from new grads and current students are being autorejected.",
+    )
+    result = candidate_stage_gate(o)
+    assert result.passed is False
+
+
+def test_generic_early_career_wording_is_not_blocked():
+    assert candidate_stage_gate(opp(title="Software Engineer, Early Career")).passed is True
