@@ -78,7 +78,7 @@ class Opportunity:
             for key in list(compensation):
                 if key.endswith("_inr") and key not in {"converted_min_annual_inr","converted_max_annual_inr"}:compensation.setdefault("fx_rate",compensation.pop(key))
             data["compensation"]=Compensation(**compensation)
-        aliases={"issue":"issue_number","fit":"fit_score","confidence":"confidence_score","priority":"priority_score","conversion":"conversion_signal"}
+        aliases={"issue":"issue_number","fit":"fit_score","confidence":"confidence_score","priority":"priority_score","conversion":"conversion_signal","reason":"suppression_reason"}
         for old,new in aliases.items():
             if old in data:data.setdefault(new,data.pop(old))
         return cls(**data)
