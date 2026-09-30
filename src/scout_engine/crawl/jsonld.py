@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlsplit
 
+from ..kind import infer_opportunity_kind
 from ..models import Compensation, Opportunity, OpportunityKind
 from ..time_utils import to_utc_iso
 from .html import find_jobposting_nodes
@@ -72,12 +73,7 @@ def _compensation(node: dict[str, Any]) -> Compensation | None:
 
 
 def _kind(title: str, employment: str) -> OpportunityKind:
-    lower = f"{title} {employment}".lower()
-    if "intern" in lower:
-        return OpportunityKind.INTERNSHIP
-    if "contract" in lower or "temporary" in lower:
-        return OpportunityKind.CONTRACT
-    return OpportunityKind.FULL_TIME
+    return infer_opportunity_kind(title, employment)
 
 
 def _stable_id(company: str, url: str, title: str) -> str:
