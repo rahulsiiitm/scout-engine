@@ -239,7 +239,11 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
             continue
 
         counters["sources_succeeded"] += 1
-        successful_keys.update(adapter.effective_source_keys())
+        # A successful HTTP/crawl attempt is not automatically safe closure
+        # evidence. Generic career pages can return 200 with an empty parse
+        # because their DOM changed or requires unsupported rendering.
+        if fetched or adapter.source_name != "career_page":
+            successful_keys.update(adapter.effective_source_keys())
         counters["fetched"] += len(fetched)
         for raw in fetched:
             try:
