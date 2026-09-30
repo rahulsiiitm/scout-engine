@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from datetime import datetime, timezone
 
 from .models import Opportunity, OpportunityKind
@@ -47,6 +48,12 @@ def seniority_gate(opportunity: Opportunity, max_years_without_override: float =
     )
     if override:
         return GateResult(True)
+    if opportunity.kind != OpportunityKind.INTERNSHIP and re.search(
+        r"\b(?:senior|sr\.?|staff|principal|director|head|vice president|vp)\b",
+        opportunity.title,
+        flags=re.IGNORECASE,
+    ):
+        return GateResult(False, "title indicates a senior-level role with no new-grad override")
     if opportunity.experience_min is not None and opportunity.experience_min > max_years_without_override:
         return GateResult(
             False,
