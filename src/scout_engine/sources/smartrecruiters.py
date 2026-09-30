@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .base import SourceAdapter, get_json
+from ..kind import infer_opportunity_kind
 from ..models import Opportunity, OpportunityKind
 
 
@@ -67,7 +68,7 @@ class SmartRecruitersAdapter(SourceAdapter):
             )
             title = details.get("name") or job.get("name") or ""
             employment = str((details.get("typeOfEmployment") or {}).get("label") or "")
-            kind = OpportunityKind.INTERNSHIP if "intern" in f"{title} {employment}".lower() else OpportunityKind.FULL_TIME
+            kind = infer_opportunity_kind(title, employment)
             loc = details.get("location") or job.get("location") or {}
             location = ", ".join(
                 str(loc.get(k))
