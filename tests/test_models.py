@@ -51,3 +51,14 @@ def test_historical_recovery_stub_becomes_terminal_tombstone():
     assert o.stage == Stage.NOT_PURSUING
     assert o.is_terminal
     assert o.kind == OpportunityKind.UNKNOWN
+
+
+def test_compact_recovery_reason_alias_is_backward_compatible():
+    o = Opportunity.from_dict({
+        "id": "ashby:example:senior",
+        "issue": 51,
+        "stage": "not_pursuing",
+        "reason": "senior role misclassified as internship",
+    })
+    assert o.suppression_reason == "senior role misclassified as internship"
+    assert o.stage == Stage.NOT_PURSUING
