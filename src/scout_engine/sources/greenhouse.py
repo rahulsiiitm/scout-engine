@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timezone
 
 from .base import SourceAdapter, get_json
+from ..kind import infer_opportunity_kind
 from ..models import Compensation, Opportunity, OpportunityKind
 from ..time_utils import to_utc_iso
 
@@ -14,7 +15,7 @@ def _strip_html(value: str) -> str:
 
 
 def _kind(title: str) -> OpportunityKind:
-    return OpportunityKind.INTERNSHIP if "intern" in title.lower() else OpportunityKind.FULL_TIME
+    return infer_opportunity_kind(title)
 
 
 def _compensation(job: dict) -> Compensation | None:
