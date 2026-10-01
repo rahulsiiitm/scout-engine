@@ -1,21 +1,21 @@
 {
   "version": 1,
-  "generated_at": "2026-09-30T08:32:48.145215+00:00",
+  "generated_at": "2026-10-01T08:55:13.636212+00:00",
   "counters": {
     "sources_attempted": 22,
     "sources_succeeded": 18,
-    "fetched": 2289,
+    "fetched": 2283,
     "surfaced": 6,
-    "new_qualified": 2,
+    "new_qualified": 0,
     "new_conversion": 0,
-    "suppressed": 2283,
-    "duplicates": 943,
+    "suppressed": 2277,
+    "duplicates": 947,
     "errors": 4,
-    "stale_updates": 56
+    "stale_updates": 83
   },
   "suppression_reasons": {
-    "full-time compensation is missing or unverified": 2266,
-    "fit score 4.0 below 6.0": 2,
+    "full-time compensation is missing or unverified": 2261,
+    "fit score 4.0 below 6.0": 1,
     "minimum experience is 6 years with no new-grad override": 1,
     "fit score 5.5 below 6.0": 1,
     "role materially expects publications/research credentials": 4,
