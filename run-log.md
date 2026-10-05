@@ -53,3 +53,7 @@ Only source failures, access problems, and material run warnings belong here.
 | 2026-10-04 13:57 | career:nvidia.com | adapter error: NVIDIA: robots.txt disallows https://jobs.nvidia.com/ |
 | 2026-10-04 13:57 | career:qualcomm.com | adapter error: Qualcomm: robots.txt disallows https://careers.qualcomm.com/careers |
 | 2026-10-04 13:57 | career:uber.com | adapter error: Uber: career page returned HTTP 403 |
+| 2026-10-05 14:28 | career:google.com | adapter error: Google: robots.txt disallows https://www.google.com/about/careers/applications/jobs/results/ |
+| 2026-10-05 14:29 | career:nvidia.com | adapter error: NVIDIA: robots.txt disallows https://jobs.nvidia.com/ |
+| 2026-10-05 14:29 | career:qualcomm.com | adapter error: Qualcomm: robots.txt disallows https://careers.qualcomm.com/careers |
+| 2026-10-05 14:29 | career:uber.com | adapter error: Uber: career page returned HTTP 403 |

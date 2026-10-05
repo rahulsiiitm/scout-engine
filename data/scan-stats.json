@@ -1,20 +1,20 @@
 {
   "version": 1,
-  "generated_at": "2026-10-04T08:27:49.171778+00:00",
+  "generated_at": "2026-10-05T08:59:23.698349+00:00",
   "counters": {
     "sources_attempted": 22,
     "sources_succeeded": 18,
-    "fetched": 2287,
-    "surfaced": 8,
+    "fetched": 2285,
+    "surfaced": 7,
     "new_qualified": 0,
     "new_conversion": 0,
-    "suppressed": 2278,
-    "duplicates": 953,
+    "suppressed": 2276,
+    "duplicates": 951,
     "errors": 4,
-    "stale_updates": 134
+    "stale_updates": 144
   },
   "suppression_reasons": {
-    "full-time compensation is missing or unverified": 2260,
+    "full-time compensation is missing or unverified": 2258,
     "fit score 4.0 below 6.0": 3,
     "minimum experience is 6 years with no new-grad override": 1,
     "fit score 5.5 below 6.0": 1,
