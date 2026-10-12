@@ -147,7 +147,7 @@
     },
     {
       "source": "ashby",
-      "known": 890,
+      "known": 891,
       "surfaced": 16,
       "applied": 1,
       "interviews": 0,
@@ -156,11 +156,11 @@
     },
     {
       "source": "career_page",
-      "known": 151,
+      "known": 153,
       "surfaced": 1,
       "applied": 0,
       "interviews": 0,
-      "stale_or_expired": 113,
+      "stale_or_expired": 120,
       "qualified_yield": 0.007
     },
     {
