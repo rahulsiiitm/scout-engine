@@ -147,20 +147,20 @@
     },
     {
       "source": "ashby",
-      "known": 904,
+      "known": 914,
       "surfaced": 16,
       "applied": 1,
       "interviews": 0,
-      "stale_or_expired": 104,
+      "stale_or_expired": 119,
       "qualified_yield": 0.018
     },
     {
       "source": "career_page",
-      "known": 162,
+      "known": 169,
       "surfaced": 1,
       "applied": 0,
       "interviews": 0,
-      "stale_or_expired": 134,
+      "stale_or_expired": 137,
       "qualified_yield": 0.006
     },
     {
@@ -169,7 +169,7 @@
       "surfaced": 2,
       "applied": 0,
       "interviews": 0,
-      "stale_or_expired": 83,
+      "stale_or_expired": 86,
       "qualified_yield": 0.003
     },
     {
