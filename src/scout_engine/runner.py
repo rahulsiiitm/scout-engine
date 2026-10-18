@@ -149,7 +149,12 @@ def _mark_source_disappearances(
             item.missing_successful_scans = 0
             item.source_status = "open"
             continue
-        item.missing_successful_scans += 1
+        # Once a source has met the closure threshold, repeating the same
+        # successful absence cannot create another stale-state mutation.
+        # Retain the capped count as auditable closure evidence.
+        if item.source_status == "closed" and item.missing_successful_scans >= miss_limit:
+            continue
+        item.missing_successful_scans = min(miss_limit, item.missing_successful_scans + 1)
         item.source_status = "possibly_closed" if item.missing_successful_scans < miss_limit else "closed"
         changed += 1
         if item.missing_successful_scans >= miss_limit and item.stage in pre_application:
@@ -395,10 +400,18 @@ def reconcile_github_stage_labels() -> int:
         if item.issue_number is None or item.issue_number not in stage_by_issue:
             continue
         desired = stage_by_issue[item.issue_number]
-        if desired == item.stage:
-            continue
-        item.transition(desired)
-        changed += 1
+        if desired != item.stage:
+            item.transition(desired)
+            changed += 1
+        # Historical manually dismissed and expired issues must not retain a
+        # "surfaced" decision in canonical state after stage reconciliation.
+        terminal_decision = {
+            Stage.NOT_PURSUING: Decision.SUPPRESSED,
+            Stage.EXPIRED: Decision.EXPIRED,
+        }.get(desired)
+        if terminal_decision is not None and item.decision != terminal_decision:
+            item.decision = terminal_decision
+            changed += 1
     if changed:
         store.save(items)
     return changed

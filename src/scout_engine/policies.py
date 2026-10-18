@@ -69,14 +69,16 @@ def seniority_gate(opportunity: Opportunity, max_years_without_override: float =
             "graduating",
         )
     )
-    if override:
-        return GateResult(True)
+    # Seniority in the position title outweighs generic student/new-grad
+    # language elsewhere in a description (e.g. mentoring new graduates).
     if opportunity.kind != OpportunityKind.INTERNSHIP and re.search(
         r"\b(?:senior|sr\.?|staff|principal|director|head|vice president|vp)\b",
         opportunity.title,
         flags=re.IGNORECASE,
     ):
-        return GateResult(False, "title indicates a senior-level role with no new-grad override")
+        return GateResult(False, "title explicitly identifies a senior-level role")
+    if override:
+        return GateResult(True)
     if opportunity.experience_min is not None and opportunity.experience_min > max_years_without_override:
         return GateResult(
             False,
