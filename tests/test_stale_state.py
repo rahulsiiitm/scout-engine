@@ -63,3 +63,51 @@ def test_failed_source_is_not_evidence_of_closure():
     )
     assert item.missing_successful_scans == 0
     assert item.stage == Stage.QUALIFIED
+
+
+def test_closed_opportunity_stops_accumulating_stale_updates():
+    item = make(Stage.EXPIRED)
+    item.missing_successful_scans = 2
+    item.source_status = "closed"
+    for _ in range(3):
+        count = _mark_source_disappearances(
+            {"x": item},
+            successful_keys={"career:example.com"},
+            seen_by_key={"career:example.com": set()},
+            miss_limit=2,
+        )
+        assert count == 0
+        assert item.missing_successful_scans == 2
+        assert item.stage == Stage.EXPIRED
+
+
+def test_reconcile_stage_not_pursuing_also_suppresses_decision(monkeypatch):
+    from scout_engine import runner
+
+    item = make()
+    item.issue_number = 99
+    saved = []
+
+    class FakeClient:
+        @classmethod
+        def from_env(cls):
+            return cls()
+
+        def list_issues(self, state="all"):
+            return [{"number": 99, "labels": [{"name": "stage/not_pursuing"}]}]
+
+    class FakeStore:
+        def load(self):
+            return [item]
+
+        def save(self, items):
+            saved.extend(items)
+
+    monkeypatch.setenv("GITHUB_TOKEN", "test")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
+    monkeypatch.setattr(runner, "GitHubClient", FakeClient)
+    monkeypatch.setattr(runner, "OpportunityStore", FakeStore)
+    assert runner.reconcile_github_stage_labels() == 2
+    assert item.stage == Stage.NOT_PURSUING
+    assert item.decision == Decision.SUPPRESSED
+    assert saved == [item]
