@@ -6,6 +6,9 @@ version: 3
 greenhouse:
   - company: xAI
     board: xai
+  # Official employer-owned board; bypasses Anthropic's >2 MB HTML careers index.
+  - company: Anthropic
+    board: anthropic
 lever: []
 workable: []
 smartrecruiters: []
