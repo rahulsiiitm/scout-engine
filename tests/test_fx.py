@@ -19,3 +19,22 @@ def test_ecb_parser():
 def test_foreign_compensation_uses_converted_floor():
     comp = Compensation(currency="USD", min_annual=20_000, verified=True, converted_min_annual_inr=1_800_000)
     assert comp.min_lpa_inr == 18
+
+
+
+def test_fx_failure_is_logged_but_does_not_invent_exchange_rate(monkeypatch, caplog):
+    from scout_engine.enrich import fx
+
+    fx._FX_WARNED.clear()
+
+    def failed_ecb_fetch():
+        raise ConnectionError("ECB unavailable")
+
+    monkeypatch.setattr(fx, "current_fx_table", failed_ecb_fetch)
+    comp = Compensation(currency="USD", min_annual=100_000, verified=True)
+    with caplog.at_level("WARNING"):
+        fx.convert_compensation_to_inr(comp)
+        fx.convert_compensation_to_inr(comp)
+    assert comp.converted_min_annual_inr is None
+    assert comp.fx_rate is None
+    assert caplog.text.count("FX conversion skipped") == 1

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +13,7 @@ from ..models import Compensation
 
 
 ECB_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+_FX_WARNED: set[tuple[str, str]] = set()
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,7 +100,13 @@ def convert_compensation_to_inr(compensation: Compensation) -> Compensation:
         converted_max = None
         if compensation.max_annual is not None:
             converted_max, _ = table.to_inr(float(compensation.max_annual), compensation.currency)
-    except Exception:
+    except Exception as exc:
+        # Missing rates must never be guessed, but should not fail silently.
+        # Deduplicate per currency/error type to avoid log storms when ECB is down.
+        error_key = (compensation.currency.upper(), type(exc).__name__)
+        if error_key not in _FX_WARNED:
+            logging.warning("FX conversion skipped for %s (%s): %s", *error_key, exc)
+            _FX_WARNED.add(error_key)
         return compensation
     compensation.converted_min_annual_inr = converted_min
     compensation.converted_max_annual_inr = converted_max

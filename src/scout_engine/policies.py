@@ -14,6 +14,29 @@ class GateResult:
     reason: str | None = None
 
 
+# Explicitly non-engineering titles can otherwise score highly when their
+# descriptions mention AI, Python or other skills in a business context.
+# Keep this deliberately narrow: technical titles are not excluded merely
+# because they build systems used by legal/procurement teams.
+_NON_ENGINEERING_TITLE = re.compile(
+    r"\b(?:procurement|contract management|licens(?:e|ing)|intellectual property)\b",
+    re.IGNORECASE,
+)
+_TECHNICAL_TITLE = re.compile(
+    r"\b(?:engineer(?:ing)?|software|developer|technical|platform|"
+    r"machine learning|ml|ai|backend|infrastructure|robotics|"
+    r"data scientist|devops|computer vision)\b",
+    re.IGNORECASE,
+)
+
+
+def role_alignment_gate(opportunity: Opportunity) -> GateResult:
+    title = opportunity.title
+    if _NON_ENGINEERING_TITLE.search(title) and not _TECHNICAL_TITLE.search(title):
+        return GateResult(False, "title explicitly identifies a non-engineering career track")
+    return GateResult(True)
+
+
 def salary_gate(opportunity: Opportunity, minimum_lpa_exclusive: float = 10.0) -> GateResult:
     if opportunity.kind != OpportunityKind.FULL_TIME:
         return GateResult(True)
@@ -113,6 +136,7 @@ def apply_hard_gates(
     now: datetime | None = None,
 ) -> GateResult:
     gates = (
+        role_alignment_gate(opportunity),
         candidate_stage_gate(opportunity),
         salary_gate(opportunity, minimum_lpa_exclusive),
         seniority_gate(opportunity, max_years_without_override),

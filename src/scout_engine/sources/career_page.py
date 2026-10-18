@@ -124,8 +124,11 @@ class CareerPageAdapter(SourceAdapter):
             "smartrecruiters": SmartRecruitersAdapter(self.company, fingerprint.identifier),
         }
         adapter = mapping[fingerprint.provider]
-        self._effective_keys.add(adapter.source_key)
         items = adapter.fetch()
+        # Only populated, completed ATS fetches prove delegated source health.
+        # A failed/empty delegation must never advance its closure-miss counter.
+        if items:
+            self._effective_keys.add(adapter.source_key)
         for item in items:
             item.metadata["discovered_via"] = self.source_key
         return items
@@ -186,6 +189,8 @@ class CareerPageAdapter(SourceAdapter):
         return list(dict.fromkeys(jobs))
 
     def fetch(self) -> list[Opportunity]:
+        # This adapter may be reused across runs; never carry closure evidence forward.
+        self._effective_keys = {self.source_key}
         start_url = self.careers_url or f"https://{self.domain}/"
         cache = CrawlCache()
         cached = cache.get(self.source_key)
