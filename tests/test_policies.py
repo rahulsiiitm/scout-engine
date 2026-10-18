@@ -87,3 +87,21 @@ def test_engineer_building_procurement_software_is_still_allowed():
 def test_normal_ml_and_backend_roles_are_unchanged():
     assert role_alignment_gate(opp(title="ML Infrastructure Engineer")).passed is True
     assert role_alignment_gate(opp(title="Backend Developer - New Grad")).passed is True
+
+
+def test_senior_title_not_overridden_by_generic_new_grads_in_description():
+    role = opp(
+        title="Senior Full-Stack Engineer, Internal Applications",
+        description="Mentor new grads and help students grow into the team.",
+        experience_min=6,
+    )
+    assert seniority_gate(role).passed is False
+
+
+def test_early_career_role_with_explicit_grad_override_remains_allowed():
+    role = opp(
+        title="Software Engineer - Early Career",
+        description="New graduates welcome.",
+        experience_min=3,
+    )
+    assert seniority_gate(role).passed is True
