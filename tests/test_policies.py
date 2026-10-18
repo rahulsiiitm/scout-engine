@@ -1,5 +1,5 @@
 from scout_engine.models import Compensation, Opportunity, OpportunityKind
-from scout_engine.policies import candidate_stage_gate, graduation_gate, research_gate, salary_gate, seniority_gate
+from scout_engine.policies import candidate_stage_gate, graduation_gate, research_gate, role_alignment_gate, salary_gate, seniority_gate
 
 
 def opp(**overrides):
@@ -68,3 +68,22 @@ def test_explicit_new_grad_autorejection_is_blocked():
 
 def test_generic_early_career_wording_is_not_blocked():
     assert candidate_stage_gate(opp(title="Software Engineer, Early Career")).passed is True
+
+
+def test_procurement_contract_lead_is_not_an_engineering_role():
+    result = role_alignment_gate(opp(title="Contract Management Lead (Procurement)", kind=OpportunityKind.CONTRACT))
+    assert result.passed is False
+
+
+def test_ip_licensing_intern_is_not_an_engineering_role():
+    result = role_alignment_gate(opp(title="IP & Licensing - Intern", kind=OpportunityKind.INTERNSHIP))
+    assert result.passed is False
+
+
+def test_engineer_building_procurement_software_is_still_allowed():
+    assert role_alignment_gate(opp(title="Software Engineer, Procurement Platform")).passed is True
+
+
+def test_normal_ml_and_backend_roles_are_unchanged():
+    assert role_alignment_gate(opp(title="ML Infrastructure Engineer")).passed is True
+    assert role_alignment_gate(opp(title="Backend Developer - New Grad")).passed is True
