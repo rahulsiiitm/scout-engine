@@ -400,10 +400,18 @@ def reconcile_github_stage_labels() -> int:
         if item.issue_number is None or item.issue_number not in stage_by_issue:
             continue
         desired = stage_by_issue[item.issue_number]
-        if desired == item.stage:
-            continue
-        item.transition(desired)
-        changed += 1
+        if desired != item.stage:
+            item.transition(desired)
+            changed += 1
+        # Historical manually dismissed and expired issues must not retain a
+        # "surfaced" decision in canonical state after stage reconciliation.
+        terminal_decision = {
+            Stage.NOT_PURSUING: Decision.SUPPRESSED,
+            Stage.EXPIRED: Decision.EXPIRED,
+        }.get(desired)
+        if terminal_decision is not None and item.decision != terminal_decision:
+            item.decision = terminal_decision
+            changed += 1
     if changed:
         store.save(items)
     return changed
