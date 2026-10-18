@@ -38,3 +38,24 @@ def test_fx_failure_is_logged_but_does_not_invent_exchange_rate(monkeypatch, cap
     assert comp.converted_min_annual_inr is None
     assert comp.fx_rate is None
     assert caplog.text.count("FX conversion skipped") == 1
+
+
+def test_verified_foreign_monthly_pay_is_annualized_before_conversion(monkeypatch):
+    from scout_engine.enrich import fx
+
+    monkeypatch.setattr(
+        fx, "current_fx_table",
+        lambda: FxTable("2026-10-16", {"USD": 1.2, "INR": 108.0}),
+    )
+    pay = Compensation(
+        currency="USD",
+        min_annual=3_000,
+        max_annual=5_000,
+        period="month",
+        verified=True,
+    )
+    fx.convert_compensation_to_inr(pay)
+    assert pay.converted_min_annual_inr == 3_240_000
+    assert pay.converted_max_annual_inr == 5_400_000
+    assert pay.min_lpa_inr == 32.4
+    assert pay.fx_rate_date == "2026-10-16"
