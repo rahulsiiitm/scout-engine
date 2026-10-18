@@ -149,7 +149,12 @@ def _mark_source_disappearances(
             item.missing_successful_scans = 0
             item.source_status = "open"
             continue
-        item.missing_successful_scans += 1
+        # Once a source has met the closure threshold, repeating the same
+        # successful absence cannot create another stale-state mutation.
+        # Retain the capped count as auditable closure evidence.
+        if item.source_status == "closed" and item.missing_successful_scans >= miss_limit:
+            continue
+        item.missing_successful_scans = min(miss_limit, item.missing_successful_scans + 1)
         item.source_status = "possibly_closed" if item.missing_successful_scans < miss_limit else "closed"
         changed += 1
         if item.missing_successful_scans >= miss_limit and item.stage in pre_application:
