@@ -56,6 +56,45 @@ def _compensation(job: dict) -> Compensation | None:
     )
 
 
+
+# Only employer-published, explicitly ANNUAL salary ranges qualify here.
+# Never infer amounts from generic compensation prose, OTE, bonuses, or equity.
+_ANNUAL_SALARY_RE = re.compile(
+    r"\bAnnual Salary\s*:\s*(?P<sign>[$£€₹])\s*"
+    r"(?P<low>\d{1,3}(?:,\d{3})+)\s*(?:-|–|—|to)\s*"
+    r"(?P<sign2>[$£€₹])?\s*(?P<high>\d{1,3}(?:,\d{3})+)"
+    r"\s*(?P<currency>USD|GBP|EUR|INR)\b",
+    re.IGNORECASE,
+)
+_CURRENCY_SYMBOLS = {"$": "USD", "£": "GBP", "€": "EUR", "₹": "INR"}
+
+
+def _official_description_compensation(job: dict, job_url: str) -> Compensation | None:
+    text = _strip_html(str(job.get("content") or ""))
+    match = _ANNUAL_SALARY_RE.search(text)
+    if not match:
+        return None
+    currency = match.group("currency").upper()
+    if _CURRENCY_SYMBOLS.get(match.group("sign")) != currency:
+        return None
+    if match.group("sign2") and _CURRENCY_SYMBOLS.get(match.group("sign2")) != currency:
+        return None
+    lower = int(match.group("low").replace(",", ""))
+    upper = int(match.group("high").replace(",", ""))
+    if lower <= 0 or upper < lower:
+        return None
+    return Compensation(
+        currency=currency,
+        min_annual=float(lower),
+        max_annual=float(upper),
+        period="year",
+        verified=True,
+        source_url=job_url,
+        source="Official Greenhouse job description, Annual Salary field",
+        verified_at=datetime.now(timezone.utc).isoformat(),
+    )
+
+
 class GreenhouseAdapter(SourceAdapter):
     source_name = "greenhouse"
 
@@ -99,6 +138,10 @@ class GreenhouseAdapter(SourceAdapter):
             comp = _compensation(job)
             if comp:
                 provenance["compensation"] = "greenhouse"
+            else:
+                comp = _official_description_compensation(job, url)
+                if comp:
+                    provenance["compensation"] = "greenhouse_official_annual_salary"
             out.append(
                 Opportunity(
                     id=f"greenhouse:{self.board}:{job['id']}",

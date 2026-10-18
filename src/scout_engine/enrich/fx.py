@@ -96,10 +96,13 @@ def convert_compensation_to_inr(compensation: Compensation) -> Compensation:
         return compensation
     try:
         table = current_fx_table()
-        converted_min, rate = table.to_inr(float(compensation.min_annual), compensation.currency)
+        # The model stores the source-period amount. Convert monthly ranges
+        # into annual INR before applying the full-time LPA floor.
+        annual_factor = 12.0 if compensation.period == "month" else 1.0
+        converted_min, rate = table.to_inr(float(compensation.min_annual) * annual_factor, compensation.currency)
         converted_max = None
         if compensation.max_annual is not None:
-            converted_max, _ = table.to_inr(float(compensation.max_annual), compensation.currency)
+            converted_max, _ = table.to_inr(float(compensation.max_annual) * annual_factor, compensation.currency)
     except Exception as exc:
         # Missing rates must never be guessed, but should not fail silently.
         # Deduplicate per currency/error type to avoid log storms when ECB is down.
