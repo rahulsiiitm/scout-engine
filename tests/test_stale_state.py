@@ -111,3 +111,94 @@ def test_reconcile_stage_not_pursuing_also_suppresses_decision(monkeypatch):
     assert item.stage == Stage.NOT_PURSUING
     assert item.decision == Decision.SUPPRESSED
     assert saved == [item]
+
+
+def test_partial_career_page_cannot_prove_disappearance():
+    from scout_engine.runner import _closure_evidence_keys
+    from scout_engine.sources.career_page import CareerPageAdapter
+
+    adapter = CareerPageAdapter("Example", "example.com", max_pages=2)
+    existing = make()
+    existing.missing_successful_scans = 1
+    existing.source_status = "possibly_closed"
+
+    # Seeing one job on a bounded crawl cannot prove that another is gone.
+    assert _closure_evidence_keys(adapter, [make()]) == set()
+    changed = _mark_source_disappearances(
+        {"x": existing},
+        successful_keys=_closure_evidence_keys(adapter, [make()]),
+        seen_by_key={adapter.source_key: {"other"}},
+        miss_limit=2,
+    )
+    assert changed == 0
+    assert existing.missing_successful_scans == 1
+    assert existing.stage == Stage.QUALIFIED
+
+
+def test_delegated_ats_keeps_its_own_closure_evidence():
+    from scout_engine.runner import _closure_evidence_keys
+    from scout_engine.sources.career_page import CareerPageAdapter
+    from scout_engine.sources.greenhouse import GreenhouseAdapter
+
+    adapter = CareerPageAdapter("Example", "example.com")
+    adapter._effective_keys.add("greenhouse:example")
+    assert _closure_evidence_keys(adapter, [make()]) == {"greenhouse:example"}
+    assert _closure_evidence_keys(GreenhouseAdapter("Example", "example"), []) == set()
+
+
+def test_enrichment_failure_cannot_complete_a_source_scan(monkeypatch, tmp_path):
+    from scout_engine import runner
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data").mkdir()
+    old = make()
+    old.metadata["source_key"] = "greenhouse:example"
+    old.missing_successful_scans = 1
+    old.source_status = "possibly_closed"
+
+    good = make()
+    good.id = "new"
+    good.metadata["source_key"] = "greenhouse:example"
+    good.decision = Decision.SUPPRESSED
+    good.suppression_reason = "test suppression"
+    broken = make()
+    broken.id = "broken"
+    broken.metadata["source_key"] = "greenhouse:example"
+
+    class Adapter:
+        source_name = "greenhouse"
+        source_key = "greenhouse:example"
+
+        def effective_source_keys(self):
+            return {self.source_key}
+
+        def fetch(self):
+            return [good, broken]
+
+    class Store:
+        def load(self):
+            return [old]
+
+        def save(self, items):
+            self.saved = items
+
+    store = Store()
+    monkeypatch.setattr(runner, "OpportunityStore", lambda: store)
+    monkeypatch.setattr(runner, "configured_adapters", lambda: [Adapter()])
+    monkeypatch.setattr(runner, "load_profile", lambda: {})
+    monkeypatch.setattr(runner, "_engine_config", lambda: object())
+    monkeypatch.setattr(runner, "load_yaml", lambda path: {"crawl": {"stale_after_successful_misses": 2}})
+    monkeypatch.setattr(runner, "_write_scan_snapshot", lambda *args: None)
+    monkeypatch.setattr(runner, "evaluate", lambda raw, **kwargs: raw)
+
+    def enrich(raw):
+        if raw.id == "broken":
+            raise RuntimeError("detail enrichment failed")
+        return raw
+
+    monkeypatch.setattr(runner, "enrich_opportunity", enrich)
+    result = runner.scan_structured_sources(sync_github=False)
+    assert result["errors"] == 1
+    assert result["stale_updates"] == 0
+    assert old.missing_successful_scans == 1
+    assert old.stage == Stage.QUALIFIED
