@@ -130,6 +130,22 @@ def _issue_labels(opportunity: Opportunity, cfg: EngineConfig) -> list[str]:
     return labels
 
 
+def _closure_evidence_keys(adapter: SourceAdapter, fetched: list[Opportunity]) -> set[str]:
+    """Only complete, populated source scans can establish absence.
+
+    Bounded career-page crawls may skip listings, blocked detail pages, or
+    browser-only content. They prove presence, never disappearance. A
+    successfully delegated structured ATS source retains its own key.
+    Empty results are conservatively not treated as closure evidence.
+    """
+    if not fetched:
+        return set()
+    keys = adapter.effective_source_keys()
+    if adapter.source_name == "career_page":
+        keys.discard(adapter.source_key)
+    return keys
+
+
 def _mark_source_disappearances(
     by_id: dict[str, Opportunity],
     *,
@@ -230,6 +246,7 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
     suppression_reasons: Counter[str] = Counter()
     surfaced_this_run: list[Opportunity] = []
     successful_keys: set[str] = set()
+    incomplete_keys: set[str] = set()
     seen_by_key: dict[str, set[str]] = defaultdict(set)
 
     for adapter in configured_adapters():
@@ -244,22 +261,24 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
             continue
 
         counters["sources_succeeded"] += 1
-        # A successful HTTP/crawl attempt is not automatically safe closure
-        # evidence. Generic career pages can return 200 with an empty parse
-        # because their DOM changed or requires unsupported rendering.
-        if fetched or adapter.source_name != "career_page":
-            successful_keys.update(adapter.effective_source_keys())
+        closure_keys = _closure_evidence_keys(adapter, fetched)
+        successful_keys.update(closure_keys)
         counters["fetched"] += len(fetched)
         for raw in fetched:
             try:
                 raw = enrich_opportunity(raw)
             except Exception as exc:
                 counters["errors"] += 1
+                # A partial enrichment pass must not turn unprocessed jobs
+                # into successful absence evidence for this source.
+                incomplete_keys.update(closure_keys)
+                metadata = getattr(raw, "metadata", {})
+                if isinstance(metadata, dict):
+                    incomplete_keys.add(str(metadata.get("source_key") or adapter.source_key))
                 _append_run_log(adapter.source_key, f"enrichment error for {getattr(raw, 'id', 'unknown')}: {exc}")
                 continue
             source_key = str(raw.metadata.get("source_key") or adapter.source_key)
             raw.metadata["source_key"] = source_key
-            successful_keys.add(source_key)
             seen_by_key[source_key].add(raw.id)
 
             old = by_id.get(raw.id)
@@ -290,7 +309,6 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                 seen_by_key[source_key].add(evaluated.id)
             discovered_via = str(raw.metadata.get("discovered_via") or "")
             if discovered_via:
-                successful_keys.add(discovered_via)
                 seen_by_key[discovered_via].add(evaluated.id)
             is_new = old is None and evaluated.id == raw.id
             by_id[evaluated.id] = evaluated
@@ -334,6 +352,8 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
             if item.issue_number is None:
                 item.issue_number = github.create_issue_for(item, _issue_labels(item, cfg))
 
+    # Never infer closure from a source with any failed enrichment.
+    successful_keys.difference_update(incomplete_keys)
     counters["stale_updates"] = _mark_source_disappearances(
         by_id,
         successful_keys=successful_keys,
