@@ -1,21 +1,21 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T07:22:18.150301+00:00",
+  "generated_at": "2026-10-25T07:39:18.929250+00:00",
   "counters": {
     "sources_attempted": 22,
     "sources_succeeded": 19,
-    "fetched": 2293,
+    "fetched": 2292,
     "surfaced": 7,
     "new_qualified": 0,
     "new_conversion": 0,
-    "suppressed": 2269,
+    "suppressed": 2270,
     "duplicates": 999,
     "errors": 3,
-    "stale_updates": 42
+    "stale_updates": 26
   },
   "suppression_reasons": {
-    "full-time compensation is missing or unverified": 2244,
-    "fit score 4.0 below 6.0": 3,
+    "full-time compensation is missing or unverified": 2242,
+    "fit score 4.0 below 6.0": 6,
     "title explicitly identifies a non-engineering career track": 8,
     "minimum experience is 7 years with no new-grad override": 1,
     "fit score 5.5 below 6.0": 1,
