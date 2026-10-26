@@ -205,6 +205,14 @@ class CareerPageAdapter(SourceAdapter):
                 etag=cached.get("etag"),
                 last_modified=cached.get("last_modified"),
             )
+            if result.not_modified and not cached.get("opportunities"):
+                # HTTP 304 has no body. An empty extraction cache is not evidence
+                # that the career page still has no jobs; fetch the page afresh.
+                result = client.fetch_text(start_url)
+                if result.not_modified:
+                    raise SourceError(
+                        f"{self.company}: unexpected HTTP 304 without conditional headers"
+                    )
             if result.not_modified and cached.get("opportunities"):
                 restored = [Opportunity.from_dict(item) for item in cached["opportunities"]]
                 now = datetime.now(timezone.utc).isoformat()
