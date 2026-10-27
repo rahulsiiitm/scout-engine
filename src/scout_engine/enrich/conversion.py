@@ -5,7 +5,11 @@ import re
 
 EXPLICIT_PATTERNS = (
     r"\bpre[- ]placement offer\b",
-    r"\bppo\b",
+    # Bare "PPO" also means proximal policy optimization in ML job descriptions.
+    # Count only employment-offer language as pre-placement evidence.
+    r"\bppo\b(?:\s+(?:is|may be|will be|can be))?\s+(?:available|offered|provided|possible|eligible|opportunit(?:y|ies)|conversion|potential|consideration)\b",
+    r"\bppo\b\s+(?:for\s+(?:successful|top|eligible|high[- ]performing|interns?|candidates?)|after\s+(?:internship|completion)|based on\s+(?:performance|internship))\b",
+    r"\b(?:receive|earn|offer(?:ed)?|provide(?:d)?|eligible for|chance of|possibility of|potential for)\s+(?:an?\s+)?ppo\b",
     r"\breturn offer\b",
     r"\bfull[- ]time conversion\b",
     r"\bconvert(?:ed|ing)? to (?:a )?full[- ]time\b",
@@ -26,6 +30,13 @@ def detect_conversion_signal(text: str) -> tuple[str, list[str]]:
         matches: list[str] = []
         for pattern in patterns:
             for match in re.finditer(pattern, normalized, flags=re.IGNORECASE):
+                # "No PPO is offered" is not a positive conversion promise.
+                if r"\bppo\b" in pattern and re.search(
+                    r"\b(?:no|without|never)\s+(?:an?\s+)?ppo\b",
+                    normalized[max(0, match.start() - 16):match.end()],
+                    flags=re.IGNORECASE,
+                ):
+                    continue
                 start = max(0, match.start() - 55)
                 end = min(len(normalized), match.end() + 85)
                 matches.append(normalized[start:end].strip())
