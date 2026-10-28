@@ -34,3 +34,27 @@ def test_research_publication_requirement_detection():
     )
     assert heavy is True
     assert pubs is True
+
+
+def test_ppo_algorithm_terms_are_not_internship_conversion_evidence():
+    for text in (
+        "Experience applying reinforcement learning to LLMs (e.g., PPO, GRPO, RLHF).",
+        "Safety post-training methods, including RLHF, RLAIF, DPO, PPO, reward modeling.",
+        "Use PPO for policy optimization in production.",
+        "No PPO is offered.",
+    ):
+        signal, evidence = detect_conversion_signal(text)
+        assert signal == "unknown"
+        assert evidence == []
+
+
+def test_ppo_offer_context_remains_explicit():
+    for text in (
+        "PPO available for strong performers.",
+        "Eligible interns may receive a PPO.",
+        "PPO based on performance after the internship.",
+        "PPO is offered to successful interns.",
+    ):
+        signal, evidence = detect_conversion_signal(text)
+        assert signal == "explicit"
+        assert evidence
