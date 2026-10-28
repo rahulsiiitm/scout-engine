@@ -1,27 +1,27 @@
 {
   "version": 1,
-  "generated_at": "2026-10-27T07:56:04.961825+00:00",
+  "generated_at": "2026-10-28T08:33:43.772851+00:00",
   "counters": {
     "sources_attempted": 22,
     "sources_succeeded": 19,
-    "fetched": 2300,
-    "surfaced": 6,
-    "new_qualified": 0,
+    "fetched": 2314,
+    "surfaced": 9,
+    "new_qualified": 1,
     "new_conversion": 0,
-    "suppressed": 2271,
+    "suppressed": 2286,
     "duplicates": 1008,
     "errors": 3,
-    "stale_updates": 19
+    "stale_updates": 30
   },
   "suppression_reasons": {
-    "full-time compensation is missing or unverified": 2246,
-    "fit score 4.0 below 6.0": 3,
+    "full-time compensation is missing or unverified": 2254,
+    "fit score 4.0 below 6.0": 8,
+    "minimum experience is 5 years with no new-grad override": 6,
     "title explicitly identifies a non-engineering career track": 8,
     "minimum experience is 7 years with no new-grad override": 1,
     "fit score 5.5 below 6.0": 1,
     "role materially expects publications/research credentials": 3,
     "minimum experience is 3 years with no new-grad override": 3,
-    "fit score 4.5 below 6.0": 1,
-    "minimum experience is 5 years with no new-grad override": 5
+    "fit score 4.5 below 6.0": 2
   }
 }
