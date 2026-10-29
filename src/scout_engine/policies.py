@@ -19,7 +19,8 @@ class GateResult:
 # Keep this deliberately narrow: technical titles are not excluded merely
 # because they build systems used by legal/procurement teams.
 _NON_ENGINEERING_TITLE = re.compile(
-    r"\b(?:procurement|contract management|licens(?:e|ing)|intellectual property)\b",
+    r"\b(?:procurement|contract management|licens(?:e|ing)|intellectual property|"
+    r"data annotation|content annotation|translator|translation|writer)\b",
     re.IGNORECASE,
 )
 _TECHNICAL_TITLE = re.compile(
