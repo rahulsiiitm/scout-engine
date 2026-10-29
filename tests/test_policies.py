@@ -105,3 +105,20 @@ def test_early_career_role_with_explicit_grad_override_remains_allowed():
         experience_min=3,
     )
     assert seniority_gate(role).passed is True
+
+
+def test_annotation_translator_contract_is_not_an_engineering_role():
+    role = opp(
+        title="Data Annotation Specialist - German Writer/Translator",
+        kind=OpportunityKind.CONTRACT,
+        description="Assist with language data annotation for AI training.",
+    )
+    assert role_alignment_gate(role).passed is False
+
+
+def test_translation_intern_is_not_an_engineering_role():
+    assert role_alignment_gate(opp(title="German Translation Intern", kind=OpportunityKind.INTERNSHIP)).passed is False
+
+
+def test_engineer_building_annotation_platform_is_still_allowed():
+    assert role_alignment_gate(opp(title="Software Engineer - Data Annotation Platform")).passed is True
