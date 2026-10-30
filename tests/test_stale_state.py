@@ -40,6 +40,7 @@ def test_two_successful_misses_expire_pre_application_only():
     )
     assert item.stage == Stage.EXPIRED
     assert item.decision == Decision.EXPIRED
+    assert item.metadata["expired_by_successful_misses"] is True
 
     applied = make(Stage.APPLIED)
     applied.missing_successful_scans = 1
@@ -202,3 +203,84 @@ def test_enrichment_failure_cannot_complete_a_source_scan(monkeypatch, tmp_path)
     assert result["stale_updates"] == 0
     assert old.missing_successful_scans == 1
     assert old.stage == Stage.QUALIFIED
+
+
+def test_reopened_inferred_closure_restores_qualified_stage():
+    from scout_engine.runner import _preserve_rediscovered_lifecycle
+
+    old = make(Stage.EXPIRED)
+    old.decision = Decision.EXPIRED
+    old.source_status = "closed"
+    old.missing_successful_scans = 2
+    old.metadata["expired_by_successful_misses"] = True
+    current = make(Stage.EXPIRED)
+    _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
+    assert current.stage == Stage.QUALIFIED
+    assert current.decision == Decision.SURFACED
+    assert current.metadata["reopened_after_inferred_closure"] is True
+
+
+def test_legacy_surfaced_expired_mismatch_is_repaired():
+    from scout_engine.runner import _preserve_rediscovered_lifecycle
+
+    old = make(Stage.EXPIRED)
+    old.source_status = "open"
+    old.decision = Decision.SURFACED
+    current = make(Stage.EXPIRED)
+    _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
+    assert current.stage == Stage.QUALIFIED
+
+
+def test_manual_expiration_is_not_reopened_by_rediscovery():
+    from scout_engine.runner import _preserve_rediscovered_lifecycle
+
+    old = make(Stage.EXPIRED)
+    old.source_status = "open"
+    old.decision = Decision.EXPIRED
+    current = make(Stage.EXPIRED)
+    _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
+    assert current.stage == Stage.EXPIRED
+    assert current.decision == Decision.EXPIRED
+
+
+def test_manual_not_pursuing_is_not_resurfaced():
+    from scout_engine.runner import _preserve_rediscovered_lifecycle
+
+    old = make(Stage.NOT_PURSUING)
+    old.decision = Decision.SUPPRESSED
+    old.suppression_reason = "user chose not to pursue"
+    current = make(Stage.NOT_PURSUING)
+    _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
+    assert current.stage == Stage.NOT_PURSUING
+    assert current.decision == Decision.SUPPRESSED
+    assert current.suppression_reason == "user chose not to pursue"
+
+
+def test_reopened_job_still_requires_hard_gate_success():
+    from scout_engine.runner import _preserve_rediscovered_lifecycle
+
+    old = make(Stage.EXPIRED)
+    old.decision = Decision.EXPIRED
+    old.source_status = "closed"
+    old.missing_successful_scans = 2
+    current = make(Stage.EXPIRED)
+    current.decision = Decision.SUPPRESSED
+    current.suppression_reason = "graduation year mismatch"
+    _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
+    assert current.stage == Stage.EXPIRED
+    assert current.decision == Decision.SUPPRESSED
+    assert current.suppression_reason == "graduation year mismatch"
+
+
+def test_manually_expired_record_with_miss_history_is_not_reopened():
+    from scout_engine.runner import _preserve_rediscovered_lifecycle
+
+    old = make(Stage.EXPIRED)
+    old.decision = Decision.EXPIRED
+    old.source_status = "closed"
+    old.missing_successful_scans = 2
+    # No inferred-expiry marker: a user's explicit expiration wins.
+    current = make(Stage.EXPIRED)
+    _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
+    assert current.stage == Stage.EXPIRED
+    assert current.decision == Decision.EXPIRED
