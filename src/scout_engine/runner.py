@@ -340,7 +340,7 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                 evaluated.stage = old.stage
                 evaluated.decision = Decision.SURFACED
                 evaluated.suppression_reason = None
-            if old:
+            if old and evaluated.id == raw.id:
                 _preserve_rediscovered_lifecycle(
                     old, evaluated, miss_limit=max(2, miss_limit)
                 )
