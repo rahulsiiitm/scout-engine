@@ -171,6 +171,7 @@ def _preserve_rediscovered_lifecycle(
         old.source_status == "closed"
         and old.missing_successful_scans >= miss_limit
         and old.decision == Decision.EXPIRED
+        and old.metadata.get("expired_by_successful_misses") is True
     )
     legacy_mismatch = (
         old.source_status == "open" and old.decision == Decision.SURFACED
@@ -210,6 +211,7 @@ def _mark_source_disappearances(
         item.source_status = "possibly_closed" if item.missing_successful_scans < miss_limit else "closed"
         changed += 1
         if item.missing_successful_scans >= miss_limit and item.stage in pre_application:
+            item.metadata["expired_by_successful_misses"] = True
             item.decision = Decision.EXPIRED
             if item.stage != Stage.EXPIRED:
                 item.transition(Stage.EXPIRED)
