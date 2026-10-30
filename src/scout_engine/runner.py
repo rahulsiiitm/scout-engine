@@ -146,6 +146,42 @@ def _closure_evidence_keys(adapter: SourceAdapter, fetched: list[Opportunity]) -
     return keys
 
 
+
+def _preserve_rediscovered_lifecycle(
+    old: Opportunity, evaluated: Opportunity, *, miss_limit: int
+) -> None:
+    """Refresh evidence without overriding terminal user choices or stranding reopened jobs."""
+    # These are user/funnel decisions, not inferred source disappearance.
+    if old.stage in {
+        Stage.NOT_PURSUING, Stage.REJECTED, Stage.WITHDRAWN,
+        Stage.CLOSED, Stage.OFFER_ACCEPTED,
+    }:
+        evaluated.stage = old.stage
+        evaluated.decision = old.decision
+        evaluated.suppression_reason = old.suppression_reason
+        return
+
+    if old.stage != Stage.EXPIRED or evaluated.decision != Decision.SURFACED:
+        return
+
+    # An expired record may become qualified again only when the current
+    # posting passes all hard gates AND its expiry was inferred from two
+    # successful misses. Repair the legacy surfaced/expired mismatch too.
+    inferred_closure = (
+        old.source_status == "closed"
+        and old.missing_successful_scans >= miss_limit
+        and old.decision == Decision.EXPIRED
+    )
+    legacy_mismatch = (
+        old.source_status == "open" and old.decision == Decision.SURFACED
+    )
+    if inferred_closure or legacy_mismatch:
+        evaluated.stage = Stage.QUALIFIED
+        evaluated.metadata["reopened_after_inferred_closure"] = True
+    else:
+        evaluated.decision = Decision.EXPIRED
+
+
 def _mark_source_disappearances(
     by_id: dict[str, Opportunity],
     *,
@@ -304,6 +340,10 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                 evaluated.stage = old.stage
                 evaluated.decision = Decision.SURFACED
                 evaluated.suppression_reason = None
+            if old:
+                _preserve_rediscovered_lifecycle(
+                    old, evaluated, miss_limit=max(2, miss_limit)
+                )
             if evaluated.id != raw.id:
                 counters["duplicates"] += 1
                 seen_by_key[source_key].add(evaluated.id)
