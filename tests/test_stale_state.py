@@ -40,6 +40,7 @@ def test_two_successful_misses_expire_pre_application_only():
     )
     assert item.stage == Stage.EXPIRED
     assert item.decision == Decision.EXPIRED
+    assert item.metadata["expired_by_successful_misses"] is True
 
     applied = make(Stage.APPLIED)
     applied.missing_successful_scans = 1
@@ -211,6 +212,7 @@ def test_reopened_inferred_closure_restores_qualified_stage():
     old.decision = Decision.EXPIRED
     old.source_status = "closed"
     old.missing_successful_scans = 2
+    old.metadata["expired_by_successful_misses"] = True
     current = make(Stage.EXPIRED)
     _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
     assert current.stage == Stage.QUALIFIED
@@ -268,3 +270,17 @@ def test_reopened_job_still_requires_hard_gate_success():
     assert current.stage == Stage.EXPIRED
     assert current.decision == Decision.SUPPRESSED
     assert current.suppression_reason == "graduation year mismatch"
+
+
+def test_manually_expired_record_with_miss_history_is_not_reopened():
+    from scout_engine.runner import _preserve_rediscovered_lifecycle
+
+    old = make(Stage.EXPIRED)
+    old.decision = Decision.EXPIRED
+    old.source_status = "closed"
+    old.missing_successful_scans = 2
+    # No inferred-expiry marker: a user's explicit expiration wins.
+    current = make(Stage.EXPIRED)
+    _preserve_rediscovered_lifecycle(old, current, miss_limit=2)
+    assert current.stage == Stage.EXPIRED
+    assert current.decision == Decision.EXPIRED
