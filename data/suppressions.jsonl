@@ -3252,3 +3252,20 @@
 {"id": "career:careers.adobe.com:ec081f8f630fb142", "reason": "fit score 4.0 below 6.0", "recorded_at": "2026-10-30T08:43:40.466389+00:00"}
 {"id": "career:careers.adobe.com:88878d1457f54e87", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-30T08:43:40.834021+00:00"}
 {"id": "career:www.metacareers.com:ebe9e89d65e246fb", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-30T08:44:33.782293+00:00"}
+{"id": "greenhouse:xai:5280433007", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:22:05.650104+00:00"}
+{"id": "greenhouse:xai:5279620007", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:22:06.543070+00:00"}
+{"id": "greenhouse:anthropic:5468266008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:22:52.574873+00:00"}
+{"id": "greenhouse:anthropic:5468374008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:22:58.306807+00:00"}
+{"id": "greenhouse:anthropic:5468380008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:22:58.512240+00:00"}
+{"id": "greenhouse:anthropic:5394403008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:23:05.299508+00:00"}
+{"id": "greenhouse:anthropic:5467690008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:23:50.012824+00:00"}
+{"id": "ashby:openai:4070d52e-0263-4cd5-9107-052b4ecc1209", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:25:22.482481+00:00"}
+{"id": "ashby:openai:2df14230-1cb5-4727-a34e-f480303e4212", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:26:39.664855+00:00"}
+{"id": "ashby:openai:65dd3a22-32f8-4559-875a-bbb923664c87", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:26:41.225851+00:00"}
+{"id": "ashby:perplexity:e03bf342-0407-45aa-b084-9aaf6939eea5", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:26:42.020030+00:00"}
+{"id": "ashby:perplexity:ba95ea8c-9aad-4152-925c-df08d6a90c0f", "reason": "title explicitly identifies a non-engineering career track", "recorded_at": "2026-10-31T08:27:04.963789+00:00"}
+{"id": "ashby:perplexity:27dd2e43-e2b0-48e8-a339-b2842b4c3298", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:27:05.429701+00:00"}
+{"id": "career:www.metacareers.com:5326dc2ad5be3650", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:29:34.638770+00:00"}
+{"id": "career:www.metacareers.com:ded3a5719376291d", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:29:35.646812+00:00"}
+{"id": "career:www.metacareers.com:0465cd1141bd8d51", "reason": "fit score 4.0 below 6.0", "recorded_at": "2026-10-31T08:29:36.783402+00:00"}
+{"id": "career:www.metacareers.com:95a221c1c209b48a", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-10-31T08:29:37.007074+00:00"}
