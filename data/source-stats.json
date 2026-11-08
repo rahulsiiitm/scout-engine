@@ -151,12 +151,12 @@
       "surfaced": 15,
       "applied": 1,
       "interviews": 0,
-      "stale_or_expired": 314,
+      "stale_or_expired": 322,
       "qualified_yield": 0.013
     },
     {
       "source": "career_page",
-      "known": 276,
+      "known": 279,
       "surfaced": 2,
       "applied": 0,
       "interviews": 0,
@@ -165,11 +165,11 @@
     },
     {
       "source": "greenhouse",
-      "known": 764,
+      "known": 765,
       "surfaced": 3,
       "applied": 0,
       "interviews": 0,
-      "stale_or_expired": 189,
+      "stale_or_expired": 195,
       "qualified_yield": 0.004
     },
     {
