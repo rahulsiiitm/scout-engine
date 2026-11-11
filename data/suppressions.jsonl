@@ -3433,3 +3433,23 @@
 {"id": "career:www.metacareers.com:99291d52abb851dc", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-10T09:53:44.958322+00:00"}
 {"id": "career:www.metacareers.com:12770c9cb0b34ec0", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-10T09:53:45.304916+00:00"}
 {"id": "career:www.metacareers.com:f7fa5c40f0c75f35", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-10T09:53:47.445211+00:00"}
+{"id": "greenhouse:xai:5282197007", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:16:55.123209+00:00"}
+{"id": "greenhouse:anthropic:5458159008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:18:54.593814+00:00"}
+{"id": "greenhouse:anthropic:5477753008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:19:01.554664+00:00"}
+{"id": "greenhouse:anthropic:5477601008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:19:07.325933+00:00"}
+{"id": "greenhouse:anthropic:5476579008", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:19:38.399922+00:00"}
+{"id": "ashby:openai:1ddf1fcf-a647-4016-92c3-2da4b45d1b15", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:22:41.548214+00:00"}
+{"id": "ashby:openai:206bd77f-fdc1-438e-bb04-f226fa060637", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:24:23.938004+00:00"}
+{"id": "ashby:openai:2bc7ca9b-4eae-4bda-982b-c1ac1d4e8596", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:24:24.509059+00:00"}
+{"id": "ashby:openai:681d205f-5b03-4d4d-a024-5ae7815bfde5", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:24:26.221284+00:00"}
+{"id": "ashby:openai:97493ce9-9491-4384-9be9-8069625cd766", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:24:33.264363+00:00"}
+{"id": "ashby:perplexity:be6ffac6-5d72-4768-9f88-d1231a710ec9", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:25:18.495545+00:00"}
+{"id": "ashby:cohere:5e344658-f721-4f4a-b4df-b4052b6a0393", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:25:37.978189+00:00"}
+{"id": "ashby:cohere:31bfc2b4-472f-4921-86b1-010daa2da1e8", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:25:54.242974+00:00"}
+{"id": "ashby:cohere:6d2d5e2e-46bd-4da5-9e03-573578424976", "reason": "fit score 4.5 below 6.0", "recorded_at": "2026-11-11T09:26:02.925480+00:00"}
+{"id": "ashby:mistral.ai:7bad9d50-add8-46a8-b462-dca6990f64a9", "reason": "fit score 4.0 below 6.0", "recorded_at": "2026-11-11T09:27:08.882202+00:00"}
+{"id": "career:www.metacareers.com:c329bf7f7b24b495", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:28:28.370144+00:00"}
+{"id": "career:www.metacareers.com:2ded433bd25f30d9", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:28:30.008674+00:00"}
+{"id": "career:www.metacareers.com:a7e1615dc7e54401", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:28:30.472991+00:00"}
+{"id": "career:www.metacareers.com:61faea4db592326a", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:28:31.970672+00:00"}
+{"id": "career:www.metacareers.com:44c04dec4127994d", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-11T09:28:32.298528+00:00"}
