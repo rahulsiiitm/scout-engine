@@ -103,6 +103,12 @@ def graduation_gate(opportunity: Opportunity, candidate_graduation_year: int | N
 def research_gate(opportunity: Opportunity, candidate_has_publications: bool = False) -> GateResult:
     if not opportunity.research_heavy and not opportunity.requires_publications:
         return GateResult(True)
+    if opportunity.research_heavy and re.search(
+        r"\b(?:ph\.?\s*d\.?|doctoral)\b",
+        opportunity.title,
+        flags=re.IGNORECASE,
+    ):
+        return GateResult(False, "research role explicitly targets PhD/doctoral candidates")
     if opportunity.requires_publications and not candidate_has_publications:
         return GateResult(False, "role materially expects publications/research credentials")
     return GateResult(True)
