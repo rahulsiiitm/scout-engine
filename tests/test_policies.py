@@ -41,6 +41,28 @@ def test_research_publication_gate_blocks_without_evidence():
     assert research_gate(opp(research_heavy=True, requires_publications=True), candidate_has_publications=False).passed is False
 
 
+def test_phd_research_internship_is_blocked_without_publication_requirement():
+    role = opp(
+        title="Research Scientist Intern, Generative AI (PhD)",
+        kind=OpportunityKind.INTERNSHIP,
+        research_heavy=True,
+        requires_publications=False,
+    )
+    result = research_gate(role, candidate_has_publications=False)
+    assert result.passed is False
+    assert result.reason == "research role explicitly targets PhD/doctoral candidates"
+
+
+def test_research_internship_without_phd_or_publication_requirement_remains_allowed():
+    role = opp(
+        title="Research Engineer Intern",
+        kind=OpportunityKind.INTERNSHIP,
+        research_heavy=True,
+        requires_publications=False,
+    )
+    assert research_gate(role, candidate_has_publications=False).passed is True
+
+
 def test_seniority_gate_blocks_three_plus_years():
     assert seniority_gate(opp(experience_min=3)).passed is False
 
