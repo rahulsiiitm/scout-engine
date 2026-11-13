@@ -188,6 +188,92 @@ class CareerPageAdapter(SourceAdapter):
                         break
         return list(dict.fromkeys(jobs))
 
+    def _fetch_sitemap_fallback(
+        self,
+        client: CrawlClient,
+        policy: RobotsPolicy,
+        start_url: str,
+        cache: CrawlCache,
+        delay: float | None,
+        cause: RuntimeError,
+    ) -> list[Opportunity]:
+        """Recover from an oversized careers index using bounded, permitted job URLs.
+
+        The response-size cap remains in force. Sitemap-discovered detail pages
+        are checked against the same robots policy and stay presence-only for
+        lifecycle purposes because this adapter is a bounded career-page crawl.
+        """
+        links = self._sitemap_urls(client, policy, start_url)
+        if not links:
+            raise SourceError(
+                f"{self.company}: career index exceeded response cap and "
+                "no robots-permitted sitemap job URLs were found"
+            ) from cause
+
+        jobs: list[Opportunity] = []
+        seen_urls: set[str] = set()
+        for link in links[: self.max_pages]:
+            if not policy.can_fetch(self.user_agent, link):
+                continue
+            if delay:
+                time.sleep(min(delay, 2.0))
+            try:
+                detail = client.fetch_text(link)
+            except Exception:
+                continue
+            if detail.status_code >= 400:
+                continue
+            structured, detail_page = self._process_page(detail.url, detail.text)
+            if structured:
+                for item in structured:
+                    if item.canonical_url not in seen_urls:
+                        jobs.append(item)
+                        seen_urls.add(item.canonical_url)
+                continue
+            heuristic = _heuristic_opportunity(
+                self.company, self.source_key, detail.url, detail_page
+            )
+            if heuristic and heuristic.canonical_url not in seen_urls:
+                jobs.append(heuristic)
+                seen_urls.add(heuristic.canonical_url)
+
+        if not jobs and self.browser_fallback:
+            for link in links[: min(self.max_pages, 4)]:
+                if not policy.can_fetch(self.user_agent, link):
+                    continue
+                try:
+                    rendered_jobs = self._rendered_detail_jobs(link)
+                except Exception:
+                    continue
+                for item in rendered_jobs:
+                    if item.canonical_url not in seen_urls:
+                        jobs.append(item)
+                        seen_urls.add(item.canonical_url)
+                if jobs:
+                    break
+
+        if not jobs:
+            raise SourceError(
+                f"{self.company}: career index exceeded response cap; "
+                "robots-permitted sitemap fallback found no extractable job details"
+            ) from cause
+
+        now = datetime.now(timezone.utc).isoformat()
+        for item in jobs:
+            item.last_seen_utc = now
+            item.last_verified_utc = now
+            item.metadata.setdefault("source_key", self.source_key)
+        cache.put(
+            self.source_key,
+            {
+                "etag": None,
+                "last_modified": None,
+                "checked_at": now,
+                "opportunities": [item.to_dict() for item in jobs],
+            },
+        )
+        return jobs
+
     def fetch(self) -> list[Opportunity]:
         # This adapter may be reused across runs; never carry closure evidence forward.
         self._effective_keys = {self.source_key}
@@ -200,11 +286,22 @@ class CareerPageAdapter(SourceAdapter):
                 raise SourceError(f"{self.company}: robots.txt disallows {start_url}")
 
             delay = policy.crawl_delay(self.user_agent)
-            result = client.fetch_text(
-                start_url,
-                etag=cached.get("etag"),
-                last_modified=cached.get("last_modified"),
-            )
+            try:
+                result = client.fetch_text(
+                    start_url,
+                    etag=cached.get("etag"),
+                    last_modified=cached.get("last_modified"),
+                )
+            except RuntimeError as exc:
+                message = str(exc)
+                if not (
+                    message.startswith("response too large:")
+                    or message.startswith("response exceeded ")
+                ):
+                    raise
+                return self._fetch_sitemap_fallback(
+                    client, policy, start_url, cache, delay, exc
+                )
             if result.not_modified and not cached.get("opportunities"):
                 # HTTP 304 has no body. An empty extraction cache is not evidence
                 # that the career page still has no jobs; fetch the page afresh.
