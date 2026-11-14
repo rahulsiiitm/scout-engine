@@ -119,3 +119,39 @@ def test_non_size_fetch_errors_do_not_trigger_sitemap_fallback(monkeypatch):
 
     assert FakeClient.calls == [(INDEX_URL, None, None)]
     assert FakeCache.saved is None
+
+
+def test_sitemap_discovery_skips_cross_host_root_map(monkeypatch):
+    adapter = _adapter(monkeypatch)
+    policy = SimpleNamespace(
+        site_maps=lambda: ["https://cdn.example.net/sitemap.xml"],
+        can_fetch=lambda user_agent, url: True,
+    )
+    client = FakeClient()
+
+    assert adapter._sitemap_urls(client, policy, INDEX_URL) == []
+    assert FakeClient.calls == []
+
+
+def test_sitemap_discovery_skips_cross_host_nested_map(monkeypatch):
+    adapter = _adapter(monkeypatch)
+    policy = SimpleNamespace(
+        site_maps=lambda: ["https://example.com/sitemap.xml"],
+        can_fetch=lambda user_agent, url: True,
+    )
+    client = FakeClient()
+    FakeClient.calls = []
+    FakeClient.responses = [
+        FetchResult(url="https://example.com/sitemap.xml", status_code=200, text="<sitemap/>")
+    ]
+    monkeypatch.setattr(
+        career_page,
+        "parse_sitemap",
+        lambda text: SimpleNamespace(
+            nested_sitemaps=[SimpleNamespace(url="https://cdn.example.net/sitemap-jobs.xml")],
+            urls=[],
+        ),
+    )
+
+    assert adapter._sitemap_urls(client, policy, INDEX_URL) == []
+    assert FakeClient.calls == [("https://example.com/sitemap.xml", None, None)]
