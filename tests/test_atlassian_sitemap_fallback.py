@@ -123,6 +123,9 @@ def test_non_size_fetch_errors_do_not_trigger_sitemap_fallback(monkeypatch):
 
 def test_sitemap_discovery_skips_cross_host_root_map(monkeypatch):
     adapter = _adapter(monkeypatch)
+    monkeypatch.setattr(
+        adapter, "_sitemap_urls", career_page.CareerPageAdapter._sitemap_urls.__get__(adapter)
+    )
     policy = SimpleNamespace(
         site_maps=lambda: ["https://cdn.example.net/sitemap.xml"],
         can_fetch=lambda user_agent, url: True,
@@ -135,6 +138,9 @@ def test_sitemap_discovery_skips_cross_host_root_map(monkeypatch):
 
 def test_sitemap_discovery_skips_cross_host_nested_map(monkeypatch):
     adapter = _adapter(monkeypatch)
+    monkeypatch.setattr(
+        adapter, "_sitemap_urls", career_page.CareerPageAdapter._sitemap_urls.__get__(adapter)
+    )
     policy = SimpleNamespace(
         site_maps=lambda: ["https://example.com/sitemap.xml"],
         can_fetch=lambda user_agent, url: True,
