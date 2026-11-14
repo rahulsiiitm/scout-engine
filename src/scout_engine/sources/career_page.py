@@ -166,7 +166,7 @@ class CareerPageAdapter(SourceAdapter):
         visited: set[str] = set()
         while queue and len(jobs) < self.max_pages:
             sitemap_url = queue.pop(0)
-            if sitemap_url in visited:
+            if sitemap_url in visited or not _same_host(sitemap_url, start_url):
                 continue
             visited.add(sitemap_url)
             if not policy.can_fetch(self.user_agent, sitemap_url):
@@ -179,7 +179,9 @@ class CareerPageAdapter(SourceAdapter):
             except Exception:
                 continue
             for nested in parsed_map.nested_sitemaps:
-                if len(queue) < 10:
+                # The loaded robots policy belongs to the career-site host.
+                # Never fetch a cross-host sitemap under another host's policy.
+                if _same_host(nested.url, start_url) and len(queue) < 10:
                     queue.append(nested.url)
             for entry in parsed_map.urls:
                 if _same_host(entry.url, start_url) and _looks_job_url(entry.url):
