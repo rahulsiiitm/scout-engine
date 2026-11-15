@@ -50,7 +50,7 @@ def test_phd_research_internship_is_blocked_without_publication_requirement():
     )
     result = research_gate(role, candidate_has_publications=False)
     assert result.passed is False
-    assert result.reason == "research role explicitly targets PhD/doctoral candidates"
+    assert result.reason == "role title explicitly targets PhD/doctoral candidates"
 
 
 def test_research_internship_without_phd_or_publication_requirement_remains_allowed():
@@ -144,3 +144,16 @@ def test_translation_intern_is_not_an_engineering_role():
 
 def test_engineer_building_annotation_platform_is_still_allowed():
     assert role_alignment_gate(opp(title="Software Engineer - Data Annotation Platform")).passed is True
+
+
+
+def test_phd_targeted_title_is_blocked_when_jsonld_research_flags_are_false():
+    role = opp(
+        title="Research Scientist Intern, Audio, Machine Learning and Computer Vision (PhD)",
+        kind=OpportunityKind.INTERNSHIP,
+        research_heavy=False,
+        requires_publications=False,
+    )
+    result = research_gate(role, candidate_has_publications=False)
+    assert result.passed is False
+    assert result.reason == "role title explicitly targets PhD/doctoral candidates"
