@@ -457,6 +457,7 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
     checked, newly_suppressed, policy_reasons = _revalidate_active_policy(by_id, profile, cfg)
     counters["policy_revalidated"] = checked
     counters["policy_newly_suppressed"] = newly_suppressed
+    counters["suppressed"] += newly_suppressed
     suppression_reasons.update(policy_reasons)
     if newly_suppressed:
         _append_run_log(
