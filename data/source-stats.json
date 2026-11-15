@@ -151,12 +151,12 @@
       "surfaced": 15,
       "applied": 1,
       "interviews": 0,
-      "stale_or_expired": 376,
+      "stale_or_expired": 384,
       "qualified_yield": 0.013
     },
     {
       "source": "career_page",
-      "known": 304,
+      "known": 307,
       "surfaced": 3,
       "applied": 0,
       "interviews": 0,
@@ -169,7 +169,7 @@
       "surfaced": 2,
       "applied": 0,
       "interviews": 0,
-      "stale_or_expired": 223,
+      "stale_or_expired": 230,
       "qualified_yield": 0.003
     },
     {
