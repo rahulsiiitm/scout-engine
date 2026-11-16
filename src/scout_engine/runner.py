@@ -13,6 +13,7 @@ from .engine import EngineConfig, evaluate
 from .enrich import enrich_opportunity
 from .github_sync import GitHubClient
 from .models import Decision, Opportunity, Stage
+from .policies import apply_hard_gates
 from .sources import AshbyAdapter, CareerPageAdapter, GreenhouseAdapter, LeverAdapter, SmartRecruitersAdapter, WorkableAdapter
 from .sources.base import SourceAdapter
 from .state import OpportunityStore
@@ -218,6 +219,53 @@ def _mark_source_disappearances(
     return changed
 
 
+def _revalidate_active_policy(
+    by_id: dict[str, Opportunity],
+    profile: dict,
+    cfg: EngineConfig,
+) -> tuple[int, int, Counter[str]]:
+    """Re-apply current hard gates to active career records without closure or funnel transitions.
+
+    Only pre-application career records are eligible. User-controlled and terminal
+    stages, competitions, and previously expired decisions are left untouched.
+    A passing hard-gate check never unsuppresses a record because it may still be
+    blocked by confidence or fit scoring from its original evaluation.
+    """
+    active_stages = {Stage.DISCOVERED, Stage.QUALIFIED, Stage.REVIEWING}
+    career_kinds = {"full_time", "internship", "contract"}
+    checked = 0
+    newly_suppressed = 0
+    reasons: Counter[str] = Counter()
+    now = datetime.now(timezone.utc)
+
+    for item in by_id.values():
+        if item.stage not in active_stages or item.kind.value not in career_kinds:
+            continue
+        if item.decision == Decision.EXPIRED:
+            continue
+
+        checked += 1
+        gate = apply_hard_gates(
+            item,
+            minimum_lpa_exclusive=cfg.minimum_lpa_exclusive,
+            candidate_has_publications=cfg.candidate_has_publications,
+            max_years_without_override=cfg.max_years_without_override,
+            candidate_graduation_year=cfg.candidate_graduation_year,
+            now=now,
+        )
+        if gate.passed:
+            continue
+
+        if item.decision != Decision.SUPPRESSED:
+            newly_suppressed += 1
+            reasons[gate.reason or "unknown"] += 1
+        if item.decision != Decision.SUPPRESSED or item.suppression_reason != gate.reason:
+            item.decision = Decision.SUPPRESSED
+            item.suppression_reason = gate.reason
+
+    return checked, newly_suppressed, reasons
+
+
 def _write_scan_snapshot(counters: dict[str, int], reasons: Counter[str]) -> None:
     now = datetime.now(IST)
     path = Path("daily") / f"{now.date().isoformat()}.md"
@@ -237,6 +285,8 @@ def _write_scan_snapshot(counters: dict[str, int], reasons: Counter[str]) -> Non
         f"- Sources succeeded/attempted: **{counters.get('sources_succeeded', 0)}/{counters.get('sources_attempted', 0)}**",
         f"- Source errors: **{counters.get('errors', 0)}**",
         f"- Stale-state updates: **{counters.get('stale_updates', 0)}**",
+        f"- Existing active career records revalidated: **{counters.get('policy_revalidated', 0)}**",
+        f"- Existing records newly blocked by hard gates: **{counters.get('policy_newly_suppressed', 0)}**",
         "",
         "## Suppression reasons",
         "",
@@ -280,6 +330,8 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
         "duplicates": 0,
         "errors": 0,
         "stale_updates": 0,
+        "policy_revalidated": 0,
+        "policy_newly_suppressed": 0,
     }
     suppression_reasons: Counter[str] = Counter()
     surfaced_this_run: list[Opportunity] = []
@@ -402,6 +454,16 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
         seen_by_key=seen_by_key,
         miss_limit=max(2, miss_limit),
     )
+    checked, newly_suppressed, policy_reasons = _revalidate_active_policy(by_id, profile, cfg)
+    counters["policy_revalidated"] = checked
+    counters["policy_newly_suppressed"] = newly_suppressed
+    counters["suppressed"] += newly_suppressed
+    suppression_reasons.update(policy_reasons)
+    if newly_suppressed:
+        _append_run_log(
+            "policy_revalidation",
+            f"re-applied current hard gates to {checked} active career records; newly suppressed {newly_suppressed}",
+        )
     store.save(list(by_id.values()))
     _write_scan_snapshot(counters, suppression_reasons)
     Path("data/scan-stats.json").write_text(
