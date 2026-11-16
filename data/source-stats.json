@@ -11,15 +11,6 @@
       "qualified_yield": 1.0
     },
     {
-      "source": "optiver",
-      "known": 2,
-      "surfaced": 2,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 0,
-      "qualified_yield": 1.0
-    },
-    {
       "source": "certa",
       "known": 1,
       "surfaced": 1,
@@ -29,34 +20,7 @@
       "qualified_yield": 1.0
     },
     {
-      "source": "domino",
-      "known": 1,
-      "surfaced": 1,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 0,
-      "qualified_yield": 1.0
-    },
-    {
       "source": "flam",
-      "known": 1,
-      "surfaced": 1,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 0,
-      "qualified_yield": 1.0
-    },
-    {
-      "source": "gc",
-      "known": 1,
-      "surfaced": 1,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 0,
-      "qualified_yield": 1.0
-    },
-    {
-      "source": "greenboard",
       "known": 1,
       "surfaced": 1,
       "applied": 0,
@@ -75,15 +39,6 @@
     },
     {
       "source": "nevonai",
-      "known": 1,
-      "surfaced": 1,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 0,
-      "qualified_yield": 1.0
-    },
-    {
-      "source": "scale",
       "known": 1,
       "surfaced": 1,
       "applied": 0,
@@ -137,6 +92,15 @@
       "qualified_yield": 0.833
     },
     {
+      "source": "optiver",
+      "known": 2,
+      "surfaced": 1,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.5
+    },
+    {
       "source": "wellfound",
       "known": 3,
       "surfaced": 1,
@@ -146,31 +110,31 @@
       "qualified_yield": 0.333
     },
     {
-      "source": "ashby",
-      "known": 1195,
-      "surfaced": 15,
-      "applied": 1,
-      "interviews": 0,
-      "stale_or_expired": 384,
-      "qualified_yield": 0.013
-    },
-    {
-      "source": "career_page",
-      "known": 307,
-      "surfaced": 3,
-      "applied": 0,
-      "interviews": 0,
-      "stale_or_expired": 176,
-      "qualified_yield": 0.01
-    },
-    {
       "source": "greenhouse",
-      "known": 788,
+      "known": 789,
       "surfaced": 2,
       "applied": 0,
       "interviews": 0,
-      "stale_or_expired": 230,
+      "stale_or_expired": 233,
       "qualified_yield": 0.003
+    },
+    {
+      "source": "ashby",
+      "known": 1196,
+      "surfaced": 3,
+      "applied": 1,
+      "interviews": 0,
+      "stale_or_expired": 384,
+      "qualified_yield": 0.003
+    },
+    {
+      "source": "career_page",
+      "known": 309,
+      "surfaced": 0,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 176,
+      "qualified_yield": 0.0
     },
     {
       "source": "kaggle",
@@ -184,6 +148,42 @@
     {
       "source": "devpost",
       "known": 2,
+      "surfaced": 0,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.0
+    },
+    {
+      "source": "domino",
+      "known": 1,
+      "surfaced": 0,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.0
+    },
+    {
+      "source": "gc",
+      "known": 1,
+      "surfaced": 0,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.0
+    },
+    {
+      "source": "greenboard",
+      "known": 1,
+      "surfaced": 0,
+      "applied": 0,
+      "interviews": 0,
+      "stale_or_expired": 0,
+      "qualified_yield": 0.0
+    },
+    {
+      "source": "scale",
+      "known": 1,
       "surfaced": 0,
       "applied": 0,
       "interviews": 0,
