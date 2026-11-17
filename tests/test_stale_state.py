@@ -202,6 +202,8 @@ def test_enrichment_failure_cannot_complete_a_source_scan(monkeypatch, tmp_path)
     result = runner.scan_structured_sources(sync_github=False)
     assert result["errors"] == 1
     assert result["stale_updates"] == 0
+    assert good.first_seen_utc == good.last_seen_utc
+    assert good.first_seen_utc is not None
     assert old.missing_successful_scans == 1
     assert old.stage == Stage.QUALIFIED
 
