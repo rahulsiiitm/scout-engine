@@ -262,6 +262,7 @@ class CareerPageAdapter(SourceAdapter):
 
         now = datetime.now(timezone.utc).isoformat()
         for item in jobs:
+            item.first_seen_utc = item.first_seen_utc or now
             item.last_seen_utc = now
             item.last_verified_utc = now
             item.metadata.setdefault("source_key", self.source_key)
@@ -316,6 +317,7 @@ class CareerPageAdapter(SourceAdapter):
                 restored = [Opportunity.from_dict(item) for item in cached["opportunities"]]
                 now = datetime.now(timezone.utc).isoformat()
                 for item in restored:
+                    item.first_seen_utc = item.first_seen_utc or now
                     item.last_seen_utc = now
                     item.last_verified_utc = now
                     item.last_http_status = 304
@@ -426,6 +428,7 @@ class CareerPageAdapter(SourceAdapter):
 
             now = datetime.now(timezone.utc).isoformat()
             for item in jobs:
+                item.first_seen_utc = item.first_seen_utc or now
                 item.last_seen_utc = now
                 item.last_verified_utc = now
                 item.metadata.setdefault("source_key", self.source_key)
