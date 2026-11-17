@@ -373,7 +373,7 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
 
             old = by_id.get(raw.id)
             if old:
-                raw.first_seen_utc = old.first_seen_utc
+                raw.first_seen_utc = old.first_seen_utc or raw.first_seen_utc
                 raw.stage = old.stage
                 raw.issue_number = old.issue_number
                 raw.source_urls = sorted(set(old.source_urls + raw.source_urls + [raw.canonical_url]))
@@ -382,8 +382,10 @@ def scan_structured_sources(*, sync_github: bool = True) -> dict[str, int]:
                 if old.stage in {Stage.APPLIED, Stage.OA, Stage.INTERVIEW, Stage.OFFER, Stage.OFFER_ACCEPTED}:
                     raw.decision = old.decision
                     raw.suppression_reason = old.suppression_reason
-            raw.last_seen_utc = datetime.now(timezone.utc).isoformat()
-            raw.last_verified_utc = raw.last_verified_utc or raw.last_seen_utc
+            observed_at = datetime.now(timezone.utc).isoformat()
+            raw.first_seen_utc = raw.first_seen_utc or observed_at
+            raw.last_seen_utc = observed_at
+            raw.last_verified_utc = raw.last_verified_utc or observed_at
             evaluated = evaluate(
                 raw,
                 profile=profile,
