@@ -78,6 +78,7 @@ def test_empty_cache_304_retries_without_conditional_headers(monkeypatch):
     result = adapter.fetch()
     assert len(result) == 1
     assert result[0].id == job.id
+    assert result[0].first_seen_utc == result[0].last_seen_utc
     assert FakeClient.calls == [(URL, '"v1"', None), (URL, None, None)]
 
 
@@ -90,3 +91,43 @@ def test_empty_cache_repeated_304_fails_closed(monkeypatch):
     with pytest.raises(SourceError, match="unexpected HTTP 304"):
         adapter.fetch()
     assert FakeClient.calls == [(URL, '"v1"', None), (URL, None, None)]
+
+
+
+def test_populated_cache_304_backfills_first_seen_timestamp(monkeypatch):
+    adapter = _adapter(monkeypatch)
+    job = Opportunity(
+        id="career:example:cached",
+        company="Example",
+        title="Software Engineer",
+        kind=OpportunityKind.FULL_TIME,
+        source="career_page",
+        canonical_url="https://example.com/jobs/cached",
+        first_seen_utc=None,
+        last_seen_utc="2026-11-01T00:00:00+00:00",
+    )
+
+    class PopulatedCache:
+        def __init__(self):
+            pass
+
+        def get(self, key):
+            return {
+                "etag": '"v1"',
+                "last_modified": None,
+                "opportunities": [job.to_dict()],
+            }
+
+        def put(self, key, value):
+            raise AssertionError("304 restore must not rewrite the cache")
+
+    monkeypatch.setattr(career_page, "CrawlCache", PopulatedCache)
+    FakeClient.responses = [
+        FetchResult(url=URL, status_code=304, text="", not_modified=True),
+    ]
+
+    result = adapter.fetch()
+
+    assert len(result) == 1
+    assert result[0].first_seen_utc == result[0].last_seen_utc
+    assert result[0].last_http_status == 304
