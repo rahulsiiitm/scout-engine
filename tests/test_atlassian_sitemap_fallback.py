@@ -90,6 +90,7 @@ def test_oversized_career_index_uses_robots_permitted_sitemap(monkeypatch):
     jobs = adapter.fetch()
 
     assert [item.id for item in jobs] == [job.id]
+    assert jobs[0].first_seen_utc == jobs[0].last_seen_utc
     assert FakeClient.calls == [
         (INDEX_URL, None, None),
         (DETAIL_URL, None, None),
