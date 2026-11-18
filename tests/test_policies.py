@@ -102,6 +102,21 @@ def test_ip_licensing_intern_is_not_an_engineering_role():
     assert result.passed is False
 
 
+def test_founding_technical_sdr_is_not_an_engineering_role():
+    role = opp(
+        title="Founding Technical SDR",
+        kind=OpportunityKind.CONTRACT,
+        description="LLM orchestration, RAG and AI workflow experience.",
+    )
+    result = role_alignment_gate(role)
+    assert result.passed is False
+    assert result.reason == "title explicitly identifies a non-engineering career track"
+
+
+def test_solutions_engineer_remains_an_engineering_role():
+    assert role_alignment_gate(opp(title="Solutions Engineer")).passed is True
+
+
 def test_engineer_building_procurement_software_is_still_allowed():
     assert role_alignment_gate(opp(title="Software Engineer, Procurement Platform")).passed is True
 
