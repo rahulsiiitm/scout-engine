@@ -23,6 +23,13 @@ _NON_ENGINEERING_TITLE = re.compile(
     r"data annotation|content annotation|translator|translation|writer)\b",
     re.IGNORECASE,
 )
+# Sales-development roles are not engineering roles even when their titles
+# include words such as "technical" or "AI".
+_EXPLICIT_NON_ENGINEERING_TITLE = re.compile(
+    r"\b(?:sdr|bdr|sales development representative|business development representative|"
+    r"account executive|sales representative)\b",
+    re.IGNORECASE,
+)
 _TECHNICAL_TITLE = re.compile(
     r"\b(?:engineer(?:ing)?|software|developer|technical|platform|"
     r"machine learning|ml|ai|backend|infrastructure|robotics|"
@@ -33,6 +40,8 @@ _TECHNICAL_TITLE = re.compile(
 
 def role_alignment_gate(opportunity: Opportunity) -> GateResult:
     title = opportunity.title
+    if _EXPLICIT_NON_ENGINEERING_TITLE.search(title):
+        return GateResult(False, "title explicitly identifies a non-engineering career track")
     if _NON_ENGINEERING_TITLE.search(title) and not _TECHNICAL_TITLE.search(title):
         return GateResult(False, "title explicitly identifies a non-engineering career track")
     return GateResult(True)
