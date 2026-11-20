@@ -111,25 +111,25 @@
     },
     {
       "source": "ashby",
-      "known": 1226,
+      "known": 1243,
       "surfaced": 4,
       "applied": 1,
       "interviews": 0,
-      "stale_or_expired": 403,
+      "stale_or_expired": 413,
       "qualified_yield": 0.003
     },
     {
       "source": "greenhouse",
-      "known": 803,
+      "known": 809,
       "surfaced": 2,
       "applied": 0,
       "interviews": 0,
-      "stale_or_expired": 251,
+      "stale_or_expired": 265,
       "qualified_yield": 0.002
     },
     {
       "source": "career_page",
-      "known": 320,
+      "known": 323,
       "surfaced": 0,
       "applied": 0,
       "interviews": 0,
