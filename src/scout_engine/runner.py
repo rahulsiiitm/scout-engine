@@ -13,7 +13,7 @@ from .engine import EngineConfig, evaluate
 from .enrich import enrich_opportunity
 from .github_sync import GitHubClient
 from .models import Decision, Opportunity, Stage
-from .policies import apply_hard_gates
+from .policies import UNVERIFIED_COMPENSATION_REASON, apply_hard_gates
 from .sources import AshbyAdapter, CareerPageAdapter, GreenhouseAdapter, LeverAdapter, SmartRecruitersAdapter, WorkableAdapter
 from .sources.base import SourceAdapter
 from .state import OpportunityStore
@@ -229,7 +229,10 @@ def _revalidate_active_policy(
     Only pre-application career records are eligible. User-controlled and terminal
     stages, competitions, and previously expired decisions are left untouched.
     A passing hard-gate check never unsuppresses a record because it may still be
-    blocked by confidence or fit scoring from its original evaluation.
+    blocked by confidence or fit scoring from its original evaluation. The one
+    exception is a record suppressed for unverified compensation: scoring blocks
+    carry their own reasons, so that reason can only have come from this gate,
+    and keeping it after the evidence is readable again is a stale verdict.
     """
     active_stages = {Stage.DISCOVERED, Stage.QUALIFIED, Stage.REVIEWING}
     career_kinds = {"full_time", "internship", "contract"}
@@ -254,6 +257,9 @@ def _revalidate_active_policy(
             now=now,
         )
         if gate.passed:
+            if item.decision == Decision.SUPPRESSED and item.suppression_reason == UNVERIFIED_COMPENSATION_REASON:
+                item.decision = Decision.SURFACED
+                item.suppression_reason = None
             continue
 
         if item.decision != Decision.SUPPRESSED:

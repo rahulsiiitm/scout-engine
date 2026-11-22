@@ -77,6 +77,11 @@ class Opportunity:
             if "fx_date" in compensation:compensation.setdefault("fx_rate_date",compensation.pop("fx_date"))
             for key in list(compensation):
                 if key.endswith("_inr") and key not in {"converted_min_annual_inr","converted_max_annual_inr"}:compensation.setdefault("fx_rate",compensation.pop(key))
+            # A dated INR conversion is only ever written for compensation that
+            # already passed verification, so a legacy record carrying one lost
+            # its flag in migration; that is recorded evidence, not a guess.
+            if not compensation.get("verified") and compensation.get("fx_rate_date") and compensation.get("converted_min_annual_inr") is not None:
+                compensation["verified"]=True;compensation["source"]=compensation.get("source") or "migrated dated FX conversion evidence"
             data["compensation"]=Compensation(**compensation)
         aliases={"issue":"issue_number","fit":"fit_score","confidence":"confidence_score","priority":"priority_score","conversion":"conversion_signal","reason":"suppression_reason"}
         for old,new in aliases.items():

@@ -38,12 +38,17 @@ def role_alignment_gate(opportunity: Opportunity) -> GateResult:
     return GateResult(True)
 
 
+# Exported so revalidation can recognise a suppression it must retire once the
+# underlying compensation evidence is available again.
+UNVERIFIED_COMPENSATION_REASON = "full-time compensation is missing or unverified"
+
+
 def salary_gate(opportunity: Opportunity, minimum_lpa_exclusive: float = 10.0) -> GateResult:
     if opportunity.kind != OpportunityKind.FULL_TIME:
         return GateResult(True)
     comp = opportunity.compensation
     if comp is None or not comp.verified:
-        return GateResult(False, "full-time compensation is missing or unverified")
+        return GateResult(False, UNVERIFIED_COMPENSATION_REASON)
     min_lpa = comp.min_lpa_inr
     if min_lpa is None:
         return GateResult(False, "full-time compensation cannot be verified in INR")

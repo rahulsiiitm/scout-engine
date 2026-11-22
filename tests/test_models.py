@@ -62,3 +62,18 @@ def test_compact_recovery_reason_alias_is_backward_compatible():
     })
     assert o.suppression_reason == "senior role misclassified as internship"
     assert o.stage == Stage.NOT_PURSUING
+
+
+def test_legacy_dated_fx_conversion_restores_lost_verification_flag():
+    # Only verified compensation is ever converted, so a stored dated INR
+    # conversion is the verification evidence the v2 -> v3 migration dropped.
+    o = Opportunity.from_dict({"id":"ashby:zip:b5242472","company":"Zip","title":"Zip — Software Engineer New Grad 2027","kind":"full_time","source":"ashby","canonical_url":"https://jobs.ashbyhq.com/zip/b5242472","compensation":{"currency":"CAD","min_annual":121000,"max_annual":126000,"period":"year","verified":False,"converted_min_annual_inr":8224000.0,"fx_rate":67.97,"fx_rate_date":"2026-09-22","fx_source":"ECB"}})
+    assert o.compensation.verified is True
+    assert o.compensation.source == "migrated dated FX conversion evidence"
+    assert o.compensation.min_lpa_inr == pytest.approx(82.24)
+
+
+def test_unconverted_compensation_is_never_promoted_to_verified():
+    o = Opportunity.from_dict({"id":"career:example.com:x","company":"Example","title":"Software Engineer","kind":"full_time","source":"career_page","canonical_url":"https://example.com/jobs/x","compensation":{"currency":"CAD","min_annual":121000,"verified":False}})
+    assert o.compensation.verified is False
+    assert o.compensation.source is None

@@ -117,3 +117,82 @@ def test_competitions_are_outside_career_policy_revalidation():
     assert newly_suppressed == 0
     assert not reasons
     assert role.decision == Decision.SURFACED
+
+
+def _legacy_cad_new_grad_role():
+    # Shape of a v2 recovery record: verified compensation whose flag was lost
+    # in migration but whose dated INR conversion survived.
+    return Opportunity.from_dict({
+        "id": "ashby:zip:b5242472-5679-4084-af77-238b6335b792",
+        "company": "Zip",
+        "title": "Zip — Software Engineer New Grad 2027",
+        "kind": "full_time",
+        "source": "ashby",
+        "canonical_url": "https://jobs.ashbyhq.com/zip/b5242472-5679-4084-af77-238b6335b792",
+        "location": "Toronto",
+        "compensation": {
+            "currency": "CAD",
+            "min_annual": 121000,
+            "max_annual": 126000,
+            "period": "year",
+            "verified": False,
+            "converted_min_annual_inr": 8224000.0,
+            "fx_rate": 67.97,
+            "fx_rate_date": "2026-09-22",
+            "fx_source": "ECB",
+        },
+        "fit_score": 8.4,
+        "confidence_score": 0.98,
+        "priority_score": 8.5,
+        "decision": "surfaced",
+        "stage": "qualified",
+        "issue_number": 50,
+        "metadata": {"state_schema_normalized_from": "v2_compact_recovery"},
+    })
+
+
+def test_migrated_record_with_dated_fx_evidence_is_not_suppressed_as_unverified():
+    role = _legacy_cad_new_grad_role()
+    checked, newly_suppressed, reasons = _revalidate_active_policy(
+        {role.id: role}, {}, EngineConfig()
+    )
+
+    assert checked == 1
+    assert newly_suppressed == 0
+    assert not reasons
+    assert role.decision == Decision.SURFACED
+    assert role.suppression_reason is None
+    assert role.stage == Stage.QUALIFIED
+    assert role.issue_number == 50
+
+
+def test_stale_unverified_compensation_suppression_is_retired():
+    role = _legacy_cad_new_grad_role()
+    role.decision = Decision.SUPPRESSED
+    role.suppression_reason = "full-time compensation is missing or unverified"
+
+    checked, newly_suppressed, reasons = _revalidate_active_policy(
+        {role.id: role}, {}, EngineConfig()
+    )
+
+    assert checked == 1
+    assert newly_suppressed == 0
+    assert not reasons
+    assert role.decision == Decision.SURFACED
+    assert role.suppression_reason is None
+
+
+def test_genuinely_unverified_full_time_record_stays_suppressed():
+    role = _legacy_cad_new_grad_role()
+    role.compensation.verified = False
+    role.decision = Decision.SUPPRESSED
+    role.suppression_reason = "full-time compensation is missing or unverified"
+
+    checked, newly_suppressed, reasons = _revalidate_active_policy(
+        {role.id: role}, {}, EngineConfig()
+    )
+
+    assert checked == 1
+    assert newly_suppressed == 0
+    assert role.decision == Decision.SUPPRESSED
+    assert role.suppression_reason == "full-time compensation is missing or unverified"
