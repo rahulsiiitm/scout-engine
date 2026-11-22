@@ -1,29 +1,28 @@
 {
   "version": 1,
-  "generated_at": "2026-11-21T09:53:40.103571+00:00",
+  "generated_at": "2026-11-22T09:56:39.446606+00:00",
   "counters": {
     "sources_attempted": 22,
     "sources_succeeded": 18,
-    "fetched": 2362,
+    "fetched": 2364,
     "surfaced": 6,
     "new_qualified": 0,
     "new_conversion": 0,
-    "suppressed": 2316,
-    "duplicates": 1085,
+    "suppressed": 2313,
+    "duplicates": 1093,
     "errors": 4,
-    "stale_updates": 36,
-    "policy_revalidated": 1549,
+    "stale_updates": 22,
+    "policy_revalidated": 1533,
     "policy_newly_suppressed": 0
   },
   "suppression_reasons": {
     "minimum experience is 5 years with no new-grad override": 8,
     "role materially expects publications/research credentials": 8,
-    "fit score 4.5 below 6.0": 14,
-    "fit score 4.0 below 6.0": 6,
-    "full-time compensation is missing or unverified": 2258,
+    "fit score 4.5 below 6.0": 13,
+    "fit score 4.0 below 6.0": 7,
+    "full-time compensation is missing or unverified": 2257,
     "title explicitly identifies a non-engineering career track": 17,
     "minimum experience is 7 years with no new-grad override": 1,
-    "role title explicitly targets PhD/doctoral candidates": 2,
-    "posting explicitly targets graduation year(s) 2029; candidate is 2027": 2
+    "role title explicitly targets PhD/doctoral candidates": 2
   }
 }
