@@ -266,3 +266,6 @@ Only source failures, access problems, and material run warnings belong here.
 | 2026-11-26 16:30 | career:google.com | adapter error: Google: robots.txt disallows https://www.google.com/about/careers/applications/jobs/results/ |
 | 2026-11-26 16:31 | career:nvidia.com | adapter error: NVIDIA: robots.txt disallows https://jobs.nvidia.com/ |
 | 2026-11-26 16:31 | career:qualcomm.com | adapter error: Qualcomm: robots.txt disallows https://careers.qualcomm.com/careers |
+| 2026-11-27 16:27 | career:google.com | adapter error: Google: robots.txt disallows https://www.google.com/about/careers/applications/jobs/results/ |
+| 2026-11-27 16:27 | career:nvidia.com | adapter error: NVIDIA: robots.txt disallows https://jobs.nvidia.com/ |
+| 2026-11-27 16:27 | career:qualcomm.com | adapter error: Qualcomm: robots.txt disallows https://careers.qualcomm.com/careers |
