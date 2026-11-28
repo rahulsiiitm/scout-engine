@@ -3696,3 +3696,10 @@
 {"id": "career:www.metacareers.com:ddef0bdad2ab2420", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-27T10:57:37.424868+00:00"}
 {"id": "career:www.metacareers.com:5077d81e0399d3b8", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-27T10:57:37.678422+00:00"}
 {"id": "career:www.metacareers.com:3eb3165d0961c814", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-27T10:57:38.938715+00:00"}
+{"id": "ashby:cohere:d24de9b2-35b6-456a-843e-a9e01d2facf2", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-28T10:27:51.686912+00:00"}
+{"id": "ashby:mistral.ai:9eb41a88-1a06-4dbe-9ec5-12919821c6b3", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-28T10:29:20.180115+00:00"}
+{"id": "ashby:mistral.ai:92c62f51-0b29-4868-b362-d139a61f42a9", "reason": "title explicitly identifies a non-engineering career track", "recorded_at": "2026-11-28T10:29:24.247624+00:00"}
+{"id": "career:www.metacareers.com:e50c9777f57425c4", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-28T10:31:04.272171+00:00"}
+{"id": "career:www.metacareers.com:8f78ec1caab4ab98", "reason": "fit score 4.0 below 6.0", "recorded_at": "2026-11-28T10:31:04.802344+00:00"}
+{"id": "career:www.metacareers.com:7e2bd120482f83b2", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-28T10:31:05.566686+00:00"}
+{"id": "career:www.metacareers.com:462df0a40402d39d", "reason": "full-time compensation is missing or unverified", "recorded_at": "2026-11-28T10:31:05.954349+00:00"}
